@@ -2,3 +2,8 @@ __pycache__/
 *.egg-info/
 *.pyc
 .env
+*.pyo
+dist/
+build/
+.vscode/
+output.txt
