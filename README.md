@@ -146,15 +146,25 @@ print(result.sources)       # source chunks with metadata
 print(result.confidence)    # retrieval relevance score
 ```
 
-### Web Q&A Interface
+### Working with Localhost Server
 
-Run the interactive web-based Q&A (no API keys needed — uses mock providers):
+RAGForge includes a robust, visually appealing Flask-based web interface to easily test your RAG pipelines locally without needing API keys. The local server comes pre-loaded with mock data and a demonstration environment.
+
+To run the web application locally:
 
 ```bash
+# Ensure you have Flask installed, then start the server:
 cd ragforge
+pip install flask
 python app.py
-# Open http://localhost:5000
 ```
+
+Once started, open your browser and navigate to `http://localhost:5000`.
+
+From the web dashboard, you can:
+- **Ingest Documents:** Upload `PDF`, `DOCX`, `TXT`, or `MD` files.
+- **URL Ingestion:** Paste web URLs to dynamically scrape and add remote content to the knowledge base.
+- **RAG Q&A:** Send contextual queries to test document vector retrieval against the synthetic mock LLM.
 
 ---
 
