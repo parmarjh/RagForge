@@ -14,8 +14,6 @@
 :root {
   --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
-
-  /* Dark palette */
   --bg-root: #08090d;
   --bg-primary: #0d0f14;
   --bg-secondary: #12151c;
@@ -23,39 +21,32 @@
   --bg-glass: rgba(18, 21, 28, 0.7);
   --bg-hover: rgba(110, 142, 251, 0.06);
   --bg-input: #141720;
-
   --border-subtle: rgba(255,255,255,0.06);
   --border-mid: rgba(255,255,255,0.08);
   --border-bright: rgba(255,255,255,0.12);
   --border-accent: rgba(110, 142, 251, 0.3);
-
   --text-primary: #e8ecf4;
   --text-secondary: #8b93a7;
   --text-muted: #505a6e;
   --text-accent: #6e8efb;
-
   --accent: #6e8efb;
   --accent-2: #a78bfa;
   --accent-gradient: linear-gradient(135deg, #6e8efb, #a78bfa);
   --accent-glow: rgba(110, 142, 251, 0.15);
   --accent-glow-strong: rgba(110, 142, 251, 0.25);
-
   --success: #34d399;
   --success-bg: rgba(52, 211, 153, 0.08);
   --warning: #fbbf24;
   --error: #f87171;
-
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-xl: 20px;
   --radius-full: 9999px;
-
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
   --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
   --shadow-lg: 0 8px 32px rgba(0,0,0,0.5);
   --shadow-glow: 0 0 30px rgba(110, 142, 251, 0.1);
-
   --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -72,766 +63,305 @@ body {
   min-height: 100vh;
   overflow-x: hidden;
 }
-
-/* Subtle background gradient */
 body::before {
   content: '';
-  position: fixed;
-  inset: 0;
+  position: fixed; inset: 0;
   background:
     radial-gradient(ellipse 60% 50% at 20% 10%, rgba(110,142,251,0.06) 0%, transparent 60%),
     radial-gradient(ellipse 50% 40% at 80% 80%, rgba(167,139,250,0.04) 0%, transparent 60%);
-  pointer-events: none;
-  z-index: 0;
+  pointer-events: none; z-index: 0;
 }
-
-/* Scrollbar */
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.18); }
 
 /* ═══════════════════════════════════════════
    APP LAYOUT
    ═══════════════════════════════════════════ */
 .app {
-  position: relative;
-  z-index: 1;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+  position: relative; z-index: 1;
+  max-width: 1200px; margin: 0 auto; padding: 20px;
+  min-height: 100vh; display: flex; flex-direction: column;
 }
 
 /* ═══════════════════════════════════════════
    HEADER
    ═══════════════════════════════════════════ */
 .header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 0;
-  margin-bottom: 24px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 0; margin-bottom: 24px;
 }
-.header-brand {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
+.header-brand { display: flex; align-items: center; gap: 14px; }
 .header-logo {
-  width: 42px;
-  height: 42px;
-  background: var(--accent-gradient);
-  border-radius: var(--radius-md);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-  font-weight: 700;
-  color: #fff;
+  width: 42px; height: 42px; background: var(--accent-gradient);
+  border-radius: var(--radius-md); display: flex; align-items: center;
+  justify-content: center; font-size: 20px; font-weight: 700; color: #fff;
   box-shadow: var(--shadow-glow);
 }
-.header-title {
-  font-size: 22px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-}
-.header-title span {
-  background: var(--accent-gradient);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-.header-subtitle {
-  font-size: 12px;
-  color: var(--text-muted);
-  font-weight: 500;
-  letter-spacing: 0.03em;
-}
-.header-stats {
-  display: flex;
-  gap: 20px;
-}
+.header-title { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
+.header-title span { background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.header-subtitle { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+.header-stats { display: flex; gap: 12px; flex-wrap: wrap; }
 .stat-chip {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-full);
-  font-size: 12px;
-  color: var(--text-secondary);
-  transition: all var(--transition);
+  display: flex; align-items: center; gap: 8px; padding: 8px 16px;
+  background: var(--bg-secondary); border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full); font-size: 12px; color: var(--text-secondary);
+  transition: all var(--transition); text-decoration: none;
 }
 .stat-chip:hover { border-color: var(--border-bright); }
 .stat-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--success);
-  box-shadow: 0 0 6px rgba(52, 211, 153, 0.5);
-  animation: pulse 2s ease infinite;
+  width: 7px; height: 7px; border-radius: 50%; background: var(--success);
+  box-shadow: 0 0 6px rgba(52, 211, 153, 0.5); animation: pulse 2s ease infinite;
 }
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
-}
-.stat-value {
-  font-weight: 600;
-  color: var(--text-primary);
-  font-family: var(--font-mono);
-  font-size: 12px;
-}
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+.stat-value { font-weight: 600; color: var(--text-primary); font-family: var(--font-mono); font-size: 12px; }
 
 /* ═══════════════════════════════════════════
    MAIN GRID
    ═══════════════════════════════════════════ */
-.main-grid {
-  display: grid;
-  grid-template-columns: 320px 1fr;
-  gap: 20px;
-  flex: 1;
-}
+.main-grid { display: grid; grid-template-columns: 340px 1fr; gap: 20px; flex: 1; }
 
 /* ═══════════════════════════════════════════
    LEFT PANEL — Knowledge Base
    ═══════════════════════════════════════════ */
 .panel {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
+  background: var(--bg-secondary); border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg); overflow: hidden; display: flex; flex-direction: column;
 }
 .panel-header {
-  padding: 18px 20px;
-  border-bottom: 1px solid var(--border-subtle);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  padding: 16px 18px; border-bottom: 1px solid var(--border-subtle);
+  display: flex; align-items: center; justify-content: space-between;
 }
-.panel-title {
-  font-size: 14px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
+.panel-title { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
 .panel-title-icon {
-  width: 20px;
-  height: 20px;
-  background: var(--accent-glow);
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
+  width: 20px; height: 20px; background: var(--accent-glow);
+  border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 11px;
 }
 .panel-badge {
-  font-size: 10px;
-  font-weight: 600;
-  font-family: var(--font-mono);
-  padding: 3px 8px;
-  border-radius: var(--radius-full);
-  background: var(--accent-glow);
-  color: var(--accent);
-  border: 1px solid var(--border-accent);
+  font-size: 10px; font-weight: 600; font-family: var(--font-mono);
+  padding: 3px 8px; border-radius: var(--radius-full);
+  background: var(--accent-glow); color: var(--accent); border: 1px solid var(--border-accent);
 }
+.panel-actions { display: flex; gap: 6px; }
+.panel-btn {
+  font-size: 10px; font-weight: 500; padding: 4px 10px;
+  border: 1px solid var(--border-subtle); border-radius: var(--radius-full);
+  background: transparent; color: var(--text-muted); cursor: pointer;
+  font-family: var(--font-body); transition: all var(--transition);
+}
+.panel-btn:hover { border-color: var(--border-bright); color: var(--text-secondary); }
+.panel-btn.danger:hover { border-color: var(--error); color: var(--error); background: rgba(248,113,113,0.08); }
 
 /* Document list */
-.doc-list {
-  flex: 1;
-  overflow-y: auto;
-  padding: 8px;
-}
+.doc-list { flex: 1; overflow-y: auto; padding: 6px; }
 .doc-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px;
-  border-radius: var(--radius-sm);
-  transition: all var(--transition);
-  cursor: default;
+  display: flex; align-items: center; gap: 10px; padding: 10px;
+  border-radius: var(--radius-sm); transition: all var(--transition);
+  cursor: default; position: relative;
 }
 .doc-item:hover { background: var(--bg-hover); }
 .doc-icon {
-  width: 34px;
-  height: 34px;
-  border-radius: var(--radius-sm);
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border-subtle);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 15px;
-  flex-shrink: 0;
+  width: 30px; height: 30px; border-radius: 6px; background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle); display: flex; align-items: center;
+  justify-content: center; font-size: 13px; flex-shrink: 0;
 }
 .doc-info { flex: 1; min-width: 0; }
-.doc-name {
-  font-size: 13px;
-  font-weight: 500;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.doc-meta {
-  font-size: 11px;
-  color: var(--text-muted);
-  display: flex;
-  gap: 8px;
-  margin-top: 2px;
-}
-.doc-chunks {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  padding: 2px 6px;
-  border-radius: 4px;
-  background: var(--accent-glow);
-  color: var(--accent);
-}
-
-/* Add document section */
-.add-doc-section {
-  border-top: 1px solid var(--border-subtle);
-  padding: 16px;
-}
-.add-doc-toggle {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 10px;
-  border: 1px dashed var(--border-mid);
-  border-radius: var(--radius-sm);
-  background: transparent;
-  color: var(--text-secondary);
-  font-family: var(--font-body);
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all var(--transition);
-}
-.add-doc-toggle:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-  background: var(--accent-glow);
-}
-.add-doc-form {
-  display: none;
-  margin-top: 12px;
-}
-.add-doc-form.active { display: block; }
-.form-group { margin-bottom: 10px; }
-.form-label {
-  display: block;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  margin-bottom: 6px;
-}
-.form-input {
-  width: 100%;
-  padding: 10px 12px;
-  background: var(--bg-input);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-  color: var(--text-primary);
-  font-family: var(--font-body);
-  font-size: 13px;
-  outline: none;
-  transition: border-color var(--transition);
-}
-.form-input:focus { border-color: var(--accent); }
-textarea.form-input {
-  min-height: 100px;
-  resize: vertical;
-  line-height: 1.6;
-}
-.btn-ingest {
-  width: 100%;
-  padding: 10px;
-  background: var(--accent-gradient);
-  color: #fff;
-  border: none;
-  border-radius: var(--radius-sm);
-  font-family: var(--font-body);
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all var(--transition);
-}
-.btn-ingest:hover { opacity: 0.9; transform: translateY(-1px); }
-.btn-ingest:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-
-/* Tab buttons for add document */
-.add-tab {
-  flex: 1;
-  padding: 8px 10px;
-  font-size: 11px;
-  font-weight: 600;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-  background: transparent;
-  color: var(--text-muted);
-  cursor: pointer;
-  transition: all var(--transition);
-  font-family: var(--font-body);
-}
-.add-tab:hover { border-color: var(--border-bright); color: var(--text-secondary); }
-.add-tab.active {
-  background: var(--accent-glow);
-  border-color: var(--border-accent);
-  color: var(--accent);
-}
-
-/* Drop zone */
-.drop-zone {
-  border: 2px dashed var(--border-mid);
-  border-radius: var(--radius-md);
-  padding: 24px 16px;
-  text-align: center;
-  cursor: pointer;
-  transition: all var(--transition);
-  background: var(--bg-input);
-}
-.drop-zone:hover, .drop-zone.dragover {
-  border-color: var(--accent);
-  background: var(--accent-glow);
-}
-.drop-zone-icon { font-size: 28px; margin-bottom: 8px; }
-.drop-zone-label {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--text-secondary);
-  margin-bottom: 4px;
-}
-.drop-zone-hint {
-  font-size: 10px;
-  color: var(--text-muted);
-  font-family: var(--font-mono);
-}
-
-/* File preview card */
-.file-preview-card {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  background: var(--success-bg);
-  border: 1px solid rgba(52, 211, 153, 0.2);
-  border-radius: var(--radius-sm);
-}
-.file-preview-icon { font-size: 20px; }
-.file-preview-info { flex: 1; min-width: 0; }
-.file-preview-name {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--success);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.file-preview-size { font-size: 10px; color: var(--text-muted); }
-.file-preview-remove {
-  width: 22px;
-  height: 22px;
-  border: 1px solid rgba(248,113,113,0.2);
-  border-radius: 4px;
-  background: rgba(248,113,113,0.1);
-  color: var(--error);
-  font-size: 11px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all var(--transition);
-}
-.file-preview-remove:hover { background: rgba(248,113,113,0.2); }
-
-/* Delete button on doc items */
-.doc-item { position: relative; }
+.doc-name { font-size: 12px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.doc-meta { font-size: 10px; color: var(--text-muted); display: flex; gap: 6px; margin-top: 1px; }
+.doc-chunks { font-family: var(--font-mono); font-size: 9px; padding: 1px 5px; border-radius: 3px; background: var(--accent-glow); color: var(--accent); }
+.doc-type-badge { font-family: var(--font-mono); font-size: 9px; padding: 1px 5px; border-radius: 3px; }
+.doc-type-badge.file { background: rgba(52,211,153,0.1); color: var(--success); }
+.doc-type-badge.url { background: rgba(34,211,238,0.1); color: #22d3ee; }
+.doc-type-badge.text { background: rgba(251,191,36,0.1); color: var(--warning); }
+.doc-type-badge.pdf { background: rgba(248,113,113,0.1); color: var(--error); }
+.doc-type-badge.docx { background: rgba(110,142,251,0.1); color: var(--accent); }
 .doc-delete {
-  position: absolute;
-  right: 8px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 22px;
-  height: 22px;
-  border: 1px solid var(--border-subtle);
-  border-radius: 4px;
-  background: transparent;
-  color: var(--text-muted);
-  font-size: 10px;
-  cursor: pointer;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  transition: all var(--transition);
+  position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+  width: 20px; height: 20px; border: 1px solid var(--border-subtle); border-radius: 4px;
+  background: transparent; color: var(--text-muted); font-size: 9px; cursor: pointer;
+  display: none; align-items: center; justify-content: center; transition: all var(--transition);
 }
 .doc-item:hover .doc-delete { display: flex; }
 .doc-delete:hover { background: rgba(248,113,113,0.15); border-color: var(--error); color: var(--error); }
 
-/* Progress animation for ingestion */
-.btn-ingest.loading {
-  pointer-events: none;
-  position: relative;
-  overflow: hidden;
+/* ═══════════════════════════════════════════
+   ADD DOCUMENT SECTION
+   ═══════════════════════════════════════════ */
+.add-doc-section { border-top: 1px solid var(--border-subtle); padding: 12px; }
+.add-doc-toggle {
+  width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 9px; border: 1px dashed var(--border-mid); border-radius: var(--radius-sm);
+  background: transparent; color: var(--text-secondary); font-family: var(--font-body);
+  font-size: 12px; font-weight: 500; cursor: pointer; transition: all var(--transition);
 }
-.btn-ingest.loading::after {
-  content: '';
-  position: absolute;
-  left: 0; top: 0; bottom: 0;
-  width: 30%;
-  background: rgba(255,255,255,0.15);
-  animation: btnProgress 1.2s ease infinite;
+.add-doc-toggle:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); }
+.add-doc-form { display: none; margin-top: 10px; }
+.add-doc-form.active { display: block; }
+
+/* Tabs */
+.add-tabs { display: flex; gap: 4px; margin-bottom: 12px; }
+.add-tab {
+  flex: 1; padding: 7px 6px; font-size: 10px; font-weight: 600;
+  border: 1px solid var(--border-subtle); border-radius: 6px; background: transparent;
+  color: var(--text-muted); cursor: pointer; transition: all var(--transition);
+  font-family: var(--font-body); text-align: center;
 }
-@keyframes btnProgress {
-  0% { left: -30%; }
-  100% { left: 100%; }
+.add-tab:hover { border-color: var(--border-bright); color: var(--text-secondary); }
+.add-tab.active { background: var(--accent-glow); border-color: var(--border-accent); color: var(--accent); }
+
+/* Drop zone */
+.drop-zone {
+  border: 2px dashed var(--border-mid); border-radius: var(--radius-md);
+  padding: 20px 12px; text-align: center; cursor: pointer;
+  transition: all var(--transition); background: var(--bg-input);
 }
+.drop-zone:hover, .drop-zone.dragover { border-color: var(--accent); background: var(--accent-glow); }
+.drop-zone-icon { font-size: 24px; margin-bottom: 6px; }
+.drop-zone-label { font-size: 11px; font-weight: 500; color: var(--text-secondary); margin-bottom: 3px; }
+.drop-zone-hint { font-size: 9px; color: var(--text-muted); font-family: var(--font-mono); }
+
+/* File preview */
+.file-preview-card {
+  display: flex; align-items: center; gap: 8px; padding: 8px 10px;
+  background: var(--success-bg); border: 1px solid rgba(52,211,153,0.2);
+  border-radius: 6px;
+}
+.file-preview-icon { font-size: 18px; }
+.file-preview-info { flex: 1; min-width: 0; }
+.file-preview-name { font-size: 11px; font-weight: 600; color: var(--success); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.file-preview-size { font-size: 9px; color: var(--text-muted); }
+.file-preview-remove {
+  width: 20px; height: 20px; border: 1px solid rgba(248,113,113,0.2); border-radius: 4px;
+  background: rgba(248,113,113,0.1); color: var(--error); font-size: 10px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; transition: all var(--transition);
+}
+.file-preview-remove:hover { background: rgba(248,113,113,0.2); }
+
+/* Form elements */
+.form-group { margin-bottom: 8px; }
+.form-label { display: block; font-size: 10px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+.form-input {
+  width: 100%; padding: 8px 10px; background: var(--bg-input);
+  border: 1px solid var(--border-subtle); border-radius: 6px;
+  color: var(--text-primary); font-family: var(--font-body); font-size: 12px;
+  outline: none; transition: border-color var(--transition);
+}
+.form-input:focus { border-color: var(--accent); }
+textarea.form-input { min-height: 80px; resize: vertical; line-height: 1.6; }
+.btn-action {
+  width: 100%; padding: 9px; background: var(--accent-gradient); color: #fff; border: none;
+  border-radius: 6px; font-family: var(--font-body); font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: all var(--transition); margin-top: 8px; position: relative; overflow: hidden;
+}
+.btn-action:hover { opacity: 0.9; transform: translateY(-1px); }
+.btn-action:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.btn-action.loading::after {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 30%;
+  background: rgba(255,255,255,0.15); animation: btnProgress 1.2s ease infinite;
+}
+@keyframes btnProgress { 0% { left: -30%; } 100% { left: 100%; } }
+
+/* Status message */
+.ingest-status {
+  margin-top: 8px; padding: 8px 10px; border-radius: 6px; font-size: 11px;
+  display: none; line-height: 1.5;
+}
+.ingest-status.info { background: var(--accent-glow); color: var(--accent); border: 1px solid var(--border-accent); display: block; }
+.ingest-status.success { background: rgba(52,211,153,0.1); color: var(--success); border: 1px solid rgba(52,211,153,0.2); display: block; }
+.ingest-status.error { background: rgba(248,113,113,0.1); color: var(--error); border: 1px solid rgba(248,113,113,0.2); display: block; }
 
 /* ═══════════════════════════════════════════
    RIGHT PANEL — Q&A Chat
    ═══════════════════════════════════════════ */
-.chat-panel {
-  display: flex;
-  flex-direction: column;
-}
-.chat-messages {
-  flex: 1;
-  overflow-y: auto;
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
+.chat-panel { display: flex; flex-direction: column; }
+.chat-messages { flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 24px; }
 
-/* Welcome state */
-.welcome-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  flex: 1;
-  text-align: center;
-  padding: 40px;
-}
-.welcome-icon {
-  width: 80px;
-  height: 80px;
-  background: var(--accent-gradient);
-  border-radius: var(--radius-xl);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 36px;
-  margin-bottom: 24px;
-  box-shadow: var(--shadow-glow);
-  animation: floatIcon 3s ease-in-out infinite;
-}
-@keyframes floatIcon {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
-}
-.welcome-h2 {
-  font-size: 24px;
-  font-weight: 700;
-  margin-bottom: 8px;
-  letter-spacing: -0.02em;
-}
-.welcome-p {
-  color: var(--text-secondary);
-  font-size: 14px;
-  max-width: 400px;
-  margin-bottom: 28px;
-  line-height: 1.7;
-}
-.starter-questions {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  width: 100%;
-  max-width: 440px;
-}
+.welcome-state { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; text-align: center; padding: 40px; }
+.welcome-icon { width: 80px; height: 80px; background: var(--accent-gradient); border-radius: var(--radius-xl); display: flex; align-items: center; justify-content: center; font-size: 36px; margin-bottom: 24px; box-shadow: var(--shadow-glow); animation: floatIcon 3s ease-in-out infinite; }
+@keyframes floatIcon { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+.welcome-h2 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+.welcome-p { color: var(--text-secondary); font-size: 14px; max-width: 400px; margin-bottom: 28px; line-height: 1.7; }
+.starter-questions { display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 440px; }
 .starter-q {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 16px;
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-  color: var(--text-secondary);
-  font-size: 13px;
-  cursor: pointer;
-  transition: all var(--transition);
-  text-align: left;
-  font-family: var(--font-body);
+  display: flex; align-items: center; gap: 10px; padding: 12px 16px;
+  background: var(--bg-tertiary); border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm); color: var(--text-secondary); font-size: 13px;
+  cursor: pointer; transition: all var(--transition); text-align: left; font-family: var(--font-body);
 }
-.starter-q:hover {
-  border-color: var(--border-accent);
-  color: var(--text-primary);
-  background: var(--bg-hover);
-  transform: translateX(4px);
-}
-.starter-q-icon {
-  color: var(--accent);
-  font-size: 14px;
-  flex-shrink: 0;
-}
+.starter-q:hover { border-color: var(--border-accent); color: var(--text-primary); background: var(--bg-hover); transform: translateX(4px); }
+.starter-q-icon { color: var(--accent); font-size: 14px; flex-shrink: 0; }
 
-/* Chat messages */
-.msg {
-  display: flex;
-  gap: 14px;
-  animation: msgSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-@keyframes msgSlideIn {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.msg-avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: var(--radius-sm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  flex-shrink: 0;
-}
-.msg-avatar.user {
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border-mid);
-}
-.msg-avatar.bot {
-  background: var(--accent-gradient);
-  color: #fff;
-}
+/* Messages */
+.msg { display: flex; gap: 14px; animation: msgSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+@keyframes msgSlideIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+.msg-avatar { width: 36px; height: 36px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+.msg-avatar.user { background: var(--bg-tertiary); border: 1px solid var(--border-mid); }
+.msg-avatar.bot { background: var(--accent-gradient); color: #fff; }
 .msg-body { flex: 1; min-width: 0; }
-.msg-sender {
-  font-size: 12px;
-  font-weight: 600;
-  margin-bottom: 6px;
-  color: var(--text-secondary);
-}
-.msg-content {
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  padding: 16px 18px;
-  font-size: 14px;
-  line-height: 1.7;
-  color: var(--text-secondary);
-  white-space: pre-wrap;
-  word-wrap: break-word;
-}
-.msg-content.user-msg {
-  background: var(--accent-glow);
-  border-color: var(--border-accent);
-  color: var(--text-primary);
-}
+.msg-sender { font-size: 12px; font-weight: 600; margin-bottom: 6px; color: var(--text-secondary); }
+.msg-content { background: var(--bg-tertiary); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 16px 18px; font-size: 14px; line-height: 1.7; color: var(--text-secondary); white-space: pre-wrap; word-wrap: break-word; }
+.msg-content.user-msg { background: var(--accent-glow); border-color: var(--border-accent); color: var(--text-primary); }
 
-/* Sources panel in message */
-.msg-sources {
-  margin-top: 12px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-}
-.msg-sources-header {
-  padding: 10px 14px;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border-bottom: 1px solid var(--border-subtle);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  cursor: pointer;
-  transition: all var(--transition);
-}
+/* Sources */
+.msg-sources { margin-top: 12px; background: var(--bg-secondary); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); overflow: hidden; }
+.msg-sources-header { padding: 10px 14px; font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border-subtle); display: flex; align-items: center; gap: 6px; cursor: pointer; transition: all var(--transition); }
 .msg-sources-header:hover { color: var(--text-secondary); }
-.source-item {
-  padding: 10px 14px;
-  border-bottom: 1px solid var(--border-subtle);
-  font-size: 12px;
-}
+.source-item { padding: 10px 14px; border-bottom: 1px solid var(--border-subtle); font-size: 12px; }
 .source-item:last-child { border-bottom: none; }
-.source-item-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 4px;
-}
-.source-name {
-  font-weight: 600;
-  color: var(--text-secondary);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.source-score {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  padding: 2px 6px;
-  border-radius: 4px;
-  background: var(--success-bg);
-  color: var(--success);
-}
-.source-text {
-  color: var(--text-muted);
-  font-size: 11px;
-  line-height: 1.6;
-  margin-top: 4px;
-}
+.source-item-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+.source-name { font-weight: 600; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; }
+.source-score { font-family: var(--font-mono); font-size: 10px; padding: 2px 6px; border-radius: 4px; background: var(--success-bg); color: var(--success); }
+.source-text { color: var(--text-muted); font-size: 11px; line-height: 1.6; margin-top: 4px; }
+.msg-meta { display: flex; gap: 12px; margin-top: 8px; font-size: 11px; color: var(--text-muted); }
+.meta-badge { display: flex; align-items: center; gap: 4px; font-family: var(--font-mono); }
 
-/* Confidence badge */
-.msg-meta {
-  display: flex;
-  gap: 12px;
-  margin-top: 8px;
-  font-size: 11px;
-  color: var(--text-muted);
-}
-.meta-badge {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-family: var(--font-mono);
-}
-
-/* Loading animation */
-.loading-dots {
-  display: flex;
-  gap: 6px;
-  padding: 16px 18px;
-}
-.loading-dots span {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--accent);
-  animation: bounce 1.4s infinite ease-in-out;
-}
+/* Loading */
+.loading-dots { display: flex; gap: 6px; padding: 16px 18px; }
+.loading-dots span { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); animation: bounce 1.4s infinite ease-in-out; }
 .loading-dots span:nth-child(1) { animation-delay: 0s; }
 .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
 .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
-@keyframes bounce {
-  0%, 80%, 100% { transform: scale(0.7); opacity: 0.4; }
-  40% { transform: scale(1); opacity: 1; }
-}
+@keyframes bounce { 0%, 80%, 100% { transform: scale(0.7); opacity: 0.4; } 40% { transform: scale(1); opacity: 1; } }
 
 /* ═══════════════════════════════════════════
    INPUT BAR
    ═══════════════════════════════════════════ */
-.input-bar {
-  padding: 16px 20px;
-  border-top: 1px solid var(--border-subtle);
-  background: var(--bg-secondary);
-  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
-}
-.input-wrapper {
-  display: flex;
-  gap: 10px;
-  align-items: flex-end;
-}
+.input-bar { padding: 16px 20px; border-top: 1px solid var(--border-subtle); background: var(--bg-secondary); border-radius: 0 0 var(--radius-lg) var(--radius-lg); }
+.input-wrapper { display: flex; gap: 10px; align-items: flex-end; }
 .input-field {
-  flex: 1;
-  padding: 12px 16px;
-  background: var(--bg-input);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  color: var(--text-primary);
-  font-family: var(--font-body);
-  font-size: 14px;
-  outline: none;
-  transition: border-color var(--transition), box-shadow var(--transition);
-  resize: none;
-  min-height: 44px;
-  max-height: 120px;
-  line-height: 1.5;
+  flex: 1; padding: 12px 16px; background: var(--bg-input);
+  border: 1px solid var(--border-subtle); border-radius: var(--radius-md);
+  color: var(--text-primary); font-family: var(--font-body); font-size: 14px;
+  outline: none; transition: border-color var(--transition), box-shadow var(--transition);
+  resize: none; min-height: 44px; max-height: 120px; line-height: 1.5;
 }
-.input-field:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-glow);
-}
+.input-field:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
 .input-field::placeholder { color: var(--text-muted); }
 .send-btn {
-  width: 44px;
-  height: 44px;
-  background: var(--accent-gradient);
-  color: #fff;
-  border: none;
-  border-radius: var(--radius-md);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all var(--transition);
-  flex-shrink: 0;
-  font-size: 18px;
+  width: 44px; height: 44px; background: var(--accent-gradient); color: #fff;
+  border: none; border-radius: var(--radius-md); display: flex; align-items: center;
+  justify-content: center; cursor: pointer; transition: all var(--transition);
+  flex-shrink: 0; font-size: 18px;
 }
 .send-btn:hover { opacity: 0.9; transform: scale(1.05); box-shadow: var(--shadow-glow); }
 .send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-.input-hint {
-  font-size: 11px;
-  color: var(--text-muted);
-  margin-top: 6px;
-  text-align: center;
-}
+.input-hint { font-size: 11px; color: var(--text-muted); margin-top: 6px; text-align: center; }
 
 /* ═══════════════════════════════════════════
-   TOAST NOTIFICATIONS
+   TOASTS
    ═══════════════════════════════════════════ */
-.toast-container {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 1000;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.toast {
-  padding: 12px 18px;
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border-mid);
-  border-radius: var(--radius-sm);
-  font-size: 13px;
-  color: var(--text-primary);
-  box-shadow: var(--shadow-lg);
-  animation: toastIn 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
+.toast-container { position: fixed; top: 20px; right: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 8px; }
+.toast { padding: 12px 18px; background: var(--bg-tertiary); border: 1px solid var(--border-mid); border-radius: var(--radius-sm); font-size: 13px; color: var(--text-primary); box-shadow: var(--shadow-lg); animation: toastIn 0.3s ease; display: flex; align-items: center; gap: 8px; }
 .toast.success { border-color: rgba(52, 211, 153, 0.3); }
 .toast.error { border-color: rgba(248, 113, 113, 0.3); }
-@keyframes toastIn {
-  from { opacity: 0; transform: translateX(20px); }
-  to { opacity: 1; transform: translateX(0); }
-}
+@keyframes toastIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
 
 /* ═══════════════════════════════════════════
    RESPONSIVE
    ═══════════════════════════════════════════ */
 @media (max-width: 800px) {
-  .main-grid {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto 1fr;
-  }
-  .panel { max-height: 260px; }
+  .main-grid { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+  .panel { max-height: 300px; }
   .header { flex-direction: column; gap: 12px; align-items: flex-start; }
   .header-stats { flex-wrap: wrap; }
 }
@@ -878,7 +408,10 @@ textarea.form-input {
           <span class="panel-title-icon">📚</span>
           Knowledge Base
         </div>
-        <span class="panel-badge" id="kb-badge">0 docs</span>
+        <div class="panel-actions">
+          <span class="panel-badge" id="kb-badge">0 docs</span>
+          <button class="panel-btn danger" onclick="clearAllDocuments()" title="Clear all documents">Clear All</button>
+        </div>
       </div>
       <div class="doc-list" id="doc-list">
         <!-- Populated dynamically -->
@@ -889,21 +422,22 @@ textarea.form-input {
         </button>
         <div class="add-doc-form" id="add-doc-form">
           <!-- Tab buttons -->
-          <div style="display:flex; gap:6px; margin-bottom:14px;">
-            <button class="add-tab active" id="tab-file" onclick="switchTab('file')">📁 Upload File</button>
-            <button class="add-tab" id="tab-text" onclick="switchTab('text')">📝 Paste Text</button>
+          <div class="add-tabs">
+            <button class="add-tab active" id="tab-file" onclick="switchTab('file')">📁 File</button>
+            <button class="add-tab" id="tab-text" onclick="switchTab('text')">📝 Text</button>
+            <button class="add-tab" id="tab-url" onclick="switchTab('url')">🌐 URL</button>
           </div>
 
           <!-- FILE UPLOAD TAB -->
           <div id="tab-content-file">
             <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
               <div class="drop-zone-icon" id="drop-zone-icon">📂</div>
-              <div class="drop-zone-label" id="drop-zone-label">Drop files here or click to browse</div>
-              <div class="drop-zone-hint">.txt, .md, .py, .csv, .json, .pdf, .docx</div>
-              <input type="file" id="file-input" accept=".txt,.md,.csv,.json,.py,.js,.html,.css,.log,.pdf,.docx" style="display:none" onchange="handleFileSelect(event)">
+              <div class="drop-zone-label">Drop files here or click to browse</div>
+              <div class="drop-zone-hint">.txt .md .py .csv .json .pdf .docx</div>
+              <input type="file" id="file-input" accept=".txt,.md,.csv,.json,.py,.js,.html,.css,.log,.pdf,.docx,.yaml,.yml,.xml,.rst,.tsv" style="display:none" onchange="handleFileSelect(event)">
             </div>
-            <div id="file-preview" style="display:none; margin-top:10px;">
-              <div class="file-preview-card" id="file-preview-card">
+            <div id="file-preview" style="display:none; margin-top:8px;">
+              <div class="file-preview-card">
                 <span class="file-preview-icon">📄</span>
                 <div class="file-preview-info">
                   <div class="file-preview-name" id="file-preview-name"></div>
@@ -912,9 +446,7 @@ textarea.form-input {
                 <button class="file-preview-remove" onclick="clearFileSelection()" title="Remove">✕</button>
               </div>
             </div>
-            <button class="btn-ingest" id="btn-upload" onclick="uploadFile()" style="margin-top:10px;">
-              ⬆ Upload & Ingest
-            </button>
+            <button class="btn-action" id="btn-upload" onclick="uploadFile()">⬆ Upload & Ingest</button>
           </div>
 
           <!-- TEXT PASTE TAB -->
@@ -927,13 +459,23 @@ textarea.form-input {
               <label class="form-label">Content</label>
               <textarea class="form-input" id="ingest-text" placeholder="Paste your text content here..."></textarea>
             </div>
-            <button class="btn-ingest" id="btn-ingest" onclick="ingestDocument()">
-              ⬆ Ingest into Knowledge Base
-            </button>
+            <button class="btn-action" id="btn-ingest" onclick="ingestText()">⬆ Ingest Text</button>
+          </div>
+
+          <!-- URL TAB -->
+          <div id="tab-content-url" style="display:none;">
+            <div class="form-group">
+              <label class="form-label">Web Page URL</label>
+              <input class="form-input" id="ingest-url" type="url" placeholder="https://example.com/docs">
+            </div>
+            <p style="font-size:10px; color:var(--text-muted); margin-bottom:6px; line-height:1.5;">
+              Enter any web page URL. RAGForge will extract text content and add it to the knowledge base.
+            </p>
+            <button class="btn-action" id="btn-url" onclick="ingestUrl()">🌐 Fetch & Ingest</button>
           </div>
 
           <!-- Status area -->
-          <div id="ingest-status" style="display:none; margin-top:10px; padding: 10px 14px; border-radius: 8px; font-size: 12px;"></div>
+          <div class="ingest-status" id="ingest-status"></div>
         </div>
       </div>
     </aside>
@@ -945,48 +487,27 @@ textarea.form-input {
           <span class="panel-title-icon">💬</span>
           Ask Questions
         </div>
-        <button class="panel-badge" style="cursor:pointer; background:transparent; border:1px solid var(--border-mid); color:var(--text-muted); font-family: var(--font-body);" onclick="clearChat()">Clear</button>
+        <button class="panel-btn" onclick="clearChat()">Clear Chat</button>
       </div>
 
       <div class="chat-messages" id="chat-messages">
-        <!-- Welcome state -->
         <div class="welcome-state" id="welcome-state">
           <div class="welcome-icon">🔍</div>
           <h2 class="welcome-h2">Ask anything</h2>
-          <p class="welcome-p">
-            Your knowledge base is loaded with documents. Ask a question and RAGForge will retrieve relevant context and generate an answer.
-          </p>
+          <p class="welcome-p">Your knowledge base is loaded with documents. Ask a question and RAGForge will retrieve relevant context and generate an answer.</p>
           <div class="starter-questions">
-            <button class="starter-q" onclick="askStarter(this)">
-              <span class="starter-q-icon">→</span>
-              What is FastAPI and what makes it fast?
-            </button>
-            <button class="starter-q" onclick="askStarter(this)">
-              <span class="starter-q-icon">→</span>
-              Tell me about Qdrant vector database
-            </button>
-            <button class="starter-q" onclick="askStarter(this)">
-              <span class="starter-q-icon">→</span>
-              How does RAGForge work?
-            </button>
-            <button class="starter-q" onclick="askStarter(this)">
-              <span class="starter-q-icon">→</span>
-              What are popular machine learning frameworks?
-            </button>
+            <button class="starter-q" onclick="askStarter(this)"><span class="starter-q-icon">→</span> What is FastAPI and what makes it fast?</button>
+            <button class="starter-q" onclick="askStarter(this)"><span class="starter-q-icon">→</span> Tell me about Qdrant vector database</button>
+            <button class="starter-q" onclick="askStarter(this)"><span class="starter-q-icon">→</span> How does RAGForge work?</button>
+            <button class="starter-q" onclick="askStarter(this)"><span class="starter-q-icon">→</span> What are popular machine learning frameworks?</button>
           </div>
         </div>
       </div>
 
       <div class="input-bar">
         <div class="input-wrapper">
-          <textarea class="input-field" id="query-input"
-            placeholder="Ask a question about your documents..."
-            rows="1"
-            onkeydown="handleKeyDown(event)"
-            oninput="autoResize(this)"></textarea>
-          <button class="send-btn" id="send-btn" onclick="sendQuery()">
-            ➤
-          </button>
+          <textarea class="input-field" id="query-input" placeholder="Ask a question about your documents..." rows="1" onkeydown="handleKeyDown(event)" oninput="autoResize(this)"></textarea>
+          <button class="send-btn" id="send-btn" onclick="sendQuery()">▶</button>
         </div>
         <div class="input-hint">Press Enter to send · Shift+Enter for new line</div>
       </div>
@@ -994,7 +515,6 @@ textarea.form-input {
   </div>
 </div>
 
-<!-- Toasts -->
 <div class="toast-container" id="toast-container"></div>
 
 <script>
@@ -1005,7 +525,7 @@ let isLoading = false;
 let selectedFile = null;
 
 // ═══════════════════════════════════════════
-// INITIALIZATION
+// INIT
 // ═══════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
   loadDocuments();
@@ -1015,47 +535,32 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ═══════════════════════════════════════════
-// DRAG & DROP SETUP
+// DRAG & DROP
 // ═══════════════════════════════════════════
 function setupDragDrop() {
   const dropZone = document.getElementById('drop-zone');
   if (!dropZone) return;
 
-  ['dragenter', 'dragover'].forEach(evt => {
-    dropZone.addEventListener(evt, (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      dropZone.classList.add('dragover');
-    });
+  ['dragenter','dragover'].forEach(e => {
+    dropZone.addEventListener(e, ev => { ev.preventDefault(); ev.stopPropagation(); dropZone.classList.add('dragover'); });
+  });
+  ['dragleave','drop'].forEach(e => {
+    dropZone.addEventListener(e, ev => { ev.preventDefault(); ev.stopPropagation(); dropZone.classList.remove('dragover'); });
+  });
+  dropZone.addEventListener('drop', e => {
+    if (e.dataTransfer.files.length > 0) setSelectedFile(e.dataTransfer.files[0]);
   });
 
-  ['dragleave', 'drop'].forEach(evt => {
-    dropZone.addEventListener(evt, (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      dropZone.classList.remove('dragover');
-    });
-  });
-
-  dropZone.addEventListener('drop', (e) => {
-    const files = e.dataTransfer.files;
-    if (files.length > 0) {
-      setSelectedFile(files[0]);
-    }
-  });
-
-  // Also allow drag/drop on the whole add-doc-section
+  // Whole section drop
   const section = document.getElementById('add-doc-section');
-  section.addEventListener('dragover', (e) => { e.preventDefault(); });
-  section.addEventListener('drop', (e) => {
+  section.addEventListener('dragover', e => e.preventDefault());
+  section.addEventListener('drop', e => {
     e.preventDefault();
-    const files = e.dataTransfer.files;
-    if (files.length > 0) {
-      // Open the form if closed
+    if (e.dataTransfer.files.length > 0) {
       const form = document.getElementById('add-doc-form');
       if (!form.classList.contains('active')) toggleAddDoc();
       switchTab('file');
-      setSelectedFile(files[0]);
+      setSelectedFile(e.dataTransfer.files[0]);
     }
   });
 }
@@ -1064,21 +569,16 @@ function setupDragDrop() {
 // FILE HANDLING
 // ═══════════════════════════════════════════
 function handleFileSelect(event) {
-  const file = event.target.files[0];
-  if (file) setSelectedFile(file);
+  if (event.target.files[0]) setSelectedFile(event.target.files[0]);
 }
 
 function setSelectedFile(file) {
   selectedFile = file;
-  const preview = document.getElementById('file-preview');
-  const dropZone = document.getElementById('drop-zone');
-
   document.getElementById('file-preview-name').textContent = file.name;
-  document.getElementById('file-preview-size').textContent = formatFileSize(file.size);
-  preview.style.display = 'block';
-  dropZone.style.display = 'none';
-
-  showIngestStatus(`📄 Ready to ingest: ${file.name}`, 'info');
+  document.getElementById('file-preview-size').textContent = formatSize(file.size);
+  document.getElementById('file-preview').style.display = 'block';
+  document.getElementById('drop-zone').style.display = 'none';
+  showStatus(`📄 Ready: ${file.name}`, 'info');
 }
 
 function clearFileSelection() {
@@ -1086,101 +586,177 @@ function clearFileSelection() {
   document.getElementById('file-input').value = '';
   document.getElementById('file-preview').style.display = 'none';
   document.getElementById('drop-zone').style.display = 'block';
-  hideIngestStatus();
+  hideStatus();
 }
 
-function formatFileSize(bytes) {
-  if (bytes < 1024) return bytes + ' B';
-  if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
-  return (bytes / 1048576).toFixed(1) + ' MB';
-}
-
-async function uploadFile() {
-  if (!selectedFile) {
-    showToast('Please select a file first', 'error');
-    return;
-  }
-
-  const btn = document.getElementById('btn-upload');
-  btn.disabled = true;
-  btn.textContent = 'Uploading...';
-  btn.classList.add('loading');
-  showIngestStatus('⏳ Uploading and processing file...', 'info');
-
-  try {
-    const formData = new FormData();
-    formData.append('file', selectedFile);
-
-    const res = await fetch('/api/upload', {
-      method: 'POST',
-      body: formData,
-    });
-    const data = await res.json();
-
-    if (data.error) {
-      showToast('Error: ' + data.error, 'error');
-      showIngestStatus('❌ ' + data.error, 'error');
-    } else {
-      showToast(`✓ Ingested "${selectedFile.name}" — ${data.chunks} chunks, ${data.chars.toLocaleString()} chars`, 'success');
-      showIngestStatus(`✓ Successfully added ${data.chunks} chunks from ${selectedFile.name}`, 'success');
-      clearFileSelection();
-      loadDocuments();
-      loadStats();
-      // Auto-close form after 1.5s
-      setTimeout(() => {
-        toggleAddDoc();
-        hideIngestStatus();
-      }, 1500);
-    }
-  } catch (e) {
-    showToast('Connection failed — is the server running?', 'error');
-    showIngestStatus('❌ Connection failed', 'error');
-  }
-
-  btn.disabled = false;
-  btn.textContent = '⬆ Upload & Ingest';
-  btn.classList.remove('loading');
+function formatSize(b) {
+  if (b < 1024) return b + ' B';
+  if (b < 1048576) return (b/1024).toFixed(1) + ' KB';
+  return (b/1048576).toFixed(1) + ' MB';
 }
 
 // ═══════════════════════════════════════════
 // TAB SWITCHING
 // ═══════════════════════════════════════════
 function switchTab(tab) {
-  document.getElementById('tab-file').classList.toggle('active', tab === 'file');
-  document.getElementById('tab-text').classList.toggle('active', tab === 'text');
-  document.getElementById('tab-content-file').style.display = tab === 'file' ? 'block' : 'none';
-  document.getElementById('tab-content-text').style.display = tab === 'text' ? 'block' : 'none';
-  hideIngestStatus();
+  ['file','text','url'].forEach(t => {
+    document.getElementById('tab-' + t).classList.toggle('active', t === tab);
+    document.getElementById('tab-content-' + t).style.display = t === tab ? 'block' : 'none';
+  });
+  hideStatus();
 }
 
 // ═══════════════════════════════════════════
-// STATUS DISPLAY
+// STATUS
 // ═══════════════════════════════════════════
-function showIngestStatus(msg, type) {
+function showStatus(msg, type) {
   const el = document.getElementById('ingest-status');
-  el.style.display = 'block';
   el.textContent = msg;
-  if (type === 'success') {
-    el.style.background = 'rgba(52, 211, 153, 0.1)';
-    el.style.color = 'var(--success)';
-    el.style.border = '1px solid rgba(52, 211, 153, 0.2)';
-  } else if (type === 'error') {
-    el.style.background = 'rgba(248, 113, 113, 0.1)';
-    el.style.color = 'var(--error)';
-    el.style.border = '1px solid rgba(248, 113, 113, 0.2)';
-  } else {
-    el.style.background = 'var(--accent-glow)';
-    el.style.color = 'var(--accent)';
-    el.style.border = '1px solid var(--border-accent)';
-  }
+  el.className = 'ingest-status ' + type;
 }
-
-function hideIngestStatus() {
-  document.getElementById('ingest-status').style.display = 'none';
+function hideStatus() {
+  const el = document.getElementById('ingest-status');
+  el.className = 'ingest-status';
+  el.style.display = 'none';
 }
 
 // ═══════════════════════════════════════════
-// API CALLS
+// TOGGLE
+// ═══════════════════════════════════════════
+function toggleAddDoc() {
+  const form = document.getElementById('add-doc-form');
+  const isOpen = form.classList.toggle('active');
+  document.getElementById('add-toggle-icon').textContent = isOpen ? '−' : '+';
+  document.getElementById('add-toggle-text').textContent = isOpen ? 'Close' : 'Add Document';
+  if (!isOpen) hideStatus();
+}
+
+// ═══════════════════════════════════════════
+// API: UPLOAD FILE
+// ═══════════════════════════════════════════
+async function uploadFile() {
+  if (!selectedFile) { showToast('Select a file first', 'error'); return; }
+
+  const btn = document.getElementById('btn-upload');
+  btn.disabled = true; btn.textContent = 'Uploading...'; btn.classList.add('loading');
+  showStatus('⏳ Uploading and processing...', 'info');
+
+  try {
+    const fd = new FormData();
+    fd.append('file', selectedFile);
+    const res = await fetch('/api/upload', { method: 'POST', body: fd });
+    const data = await res.json();
+
+    if (data.error) {
+      showToast('Error: ' + data.error, 'error');
+      showStatus('❌ ' + data.error, 'error');
+    } else {
+      showToast(`✓ ${selectedFile.name} — ${data.chunks} chunks`, 'success');
+      showStatus(`✓ Added ${data.chunks} chunks (${data.chars.toLocaleString()} chars)`, 'success');
+      clearFileSelection();
+      loadDocuments(); loadStats();
+      setTimeout(() => { toggleAddDoc(); hideStatus(); }, 1500);
+    }
+  } catch (e) {
+    showToast('Connection failed', 'error');
+    showStatus('❌ Connection failed', 'error');
+  }
+  btn.disabled = false; btn.textContent = '⬆ Upload & Ingest'; btn.classList.remove('loading');
+}
+
+// ═══════════════════════════════════════════
+// API: INGEST TEXT
+// ═══════════════════════════════════════════
+async function ingestText() {
+  const text = document.getElementById('ingest-text').value.trim();
+  const source = document.getElementById('ingest-source').value.trim() || 'user-input';
+
+  if (!text) { showToast('Enter some text content', 'error'); showStatus('❌ Content field is empty', 'error'); document.getElementById('ingest-text').focus(); return; }
+  if (text.length < 20) { showToast('Text too short', 'error'); showStatus('❌ Need at least 20 characters', 'error'); return; }
+
+  const btn = document.getElementById('btn-ingest');
+  btn.disabled = true; btn.textContent = 'Ingesting...'; btn.classList.add('loading');
+  showStatus('⏳ Processing text...', 'info');
+
+  try {
+    const res = await fetch('/api/ingest', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, source }),
+    });
+    const data = await res.json();
+
+    if (data.error) {
+      showToast('Error: ' + data.error, 'error'); showStatus('❌ ' + data.error, 'error');
+    } else {
+      showToast(`✓ "${source}" — ${data.chunks} chunks`, 'success');
+      showStatus(`✓ Added ${data.chunks} chunks`, 'success');
+      document.getElementById('ingest-text').value = '';
+      loadDocuments(); loadStats();
+      setTimeout(() => { toggleAddDoc(); hideStatus(); }, 1500);
+    }
+  } catch (e) { showToast('Connection failed', 'error'); showStatus('❌ Connection failed', 'error'); }
+  btn.disabled = false; btn.textContent = '⬆ Ingest Text'; btn.classList.remove('loading');
+}
+
+// ═══════════════════════════════════════════
+// API: INGEST URL
+// ═══════════════════════════════════════════
+async function ingestUrl() {
+  let url = document.getElementById('ingest-url').value.trim();
+  if (!url) { showToast('Enter a URL', 'error'); showStatus('❌ URL field is empty', 'error'); return; }
+
+  const btn = document.getElementById('btn-url');
+  btn.disabled = true; btn.textContent = 'Fetching...'; btn.classList.add('loading');
+  showStatus('⏳ Fetching web page...', 'info');
+
+  try {
+    const res = await fetch('/api/ingest-url', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url }),
+    });
+    const data = await res.json();
+
+    if (data.error) {
+      showToast('Error: ' + data.error, 'error'); showStatus('❌ ' + data.error, 'error');
+    } else {
+      showToast(`✓ "${data.source}" — ${data.chunks} chunks`, 'success');
+      showStatus(`✓ Added ${data.chunks} chunks (${data.chars.toLocaleString()} chars) from web`, 'success');
+      document.getElementById('ingest-url').value = '';
+      loadDocuments(); loadStats();
+      setTimeout(() => { toggleAddDoc(); hideStatus(); }, 1500);
+    }
+  } catch (e) { showToast('Connection failed', 'error'); showStatus('❌ Connection failed', 'error'); }
+  btn.disabled = false; btn.textContent = '🌐 Fetch & Ingest'; btn.classList.remove('loading');
+}
+
+// ═══════════════════════════════════════════
+// API: DELETE & CLEAR
+// ═══════════════════════════════════════════
+async function deleteDocument(name) {
+  try {
+    const res = await fetch('/api/delete', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name }),
+    });
+    const data = await res.json();
+    if (data.error) { showToast('Error: ' + data.error, 'error'); }
+    else { showToast(`Removed "${name}"`, 'success'); loadDocuments(); loadStats(); }
+  } catch (e) { showToast('Connection failed', 'error'); }
+}
+
+async function clearAllDocuments() {
+  if (!confirm('Clear ALL documents from the knowledge base? This cannot be undone.')) return;
+
+  try {
+    const res = await fetch('/api/clear', { method: 'POST' });
+    const data = await res.json();
+    if (data.error) { showToast('Error: ' + data.error, 'error'); }
+    else { showToast(`Cleared — knowledge base is empty`, 'success'); loadDocuments(); loadStats(); }
+  } catch (e) { showToast('Connection failed', 'error'); }
+}
+
+// ═══════════════════════════════════════════
+// API: LOAD DATA
 // ═══════════════════════════════════════════
 async function loadDocuments() {
   try {
@@ -1188,9 +764,7 @@ async function loadDocuments() {
     const data = await res.json();
     renderDocuments(data.documents);
     document.getElementById('kb-badge').textContent = data.documents.length + ' docs';
-  } catch (e) {
-    console.error('Failed to load documents:', e);
-  }
+  } catch (e) { console.error('Failed to load documents:', e); }
 }
 
 async function loadStats() {
@@ -1199,342 +773,154 @@ async function loadStats() {
     const data = await res.json();
     document.getElementById('stat-docs').textContent = data.total_documents;
     document.getElementById('stat-chunks').textContent = data.total_chunks;
-  } catch (e) {
-    console.error('Failed to load stats:', e);
-  }
+  } catch (e) { console.error('Failed to load stats:', e); }
 }
 
+// ═══════════════════════════════════════════
+// API: QUERY
+// ═══════════════════════════════════════════
 async function sendQuery() {
   const input = document.getElementById('query-input');
   const question = input.value.trim();
   if (!question || isLoading) return;
 
-  // Hide welcome
   const welcome = document.getElementById('welcome-state');
   if (welcome) welcome.style.display = 'none';
 
-  // Add user message
   addMessage('user', question);
-  input.value = '';
-  autoResize(input);
+  input.value = ''; autoResize(input);
 
-  // Show loading
   isLoading = true;
   document.getElementById('send-btn').disabled = true;
   const loadingEl = addLoading();
 
   try {
     const res = await fetch('/api/query', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ question }),
     });
     const data = await res.json();
-
-    // Remove loading
     loadingEl.remove();
 
-    if (data.error) {
-      addMessage('bot', 'Error: ' + data.error, null, null);
-    } else {
-      addMessage('bot', data.answer, data.sources, {
-        confidence: data.confidence,
-        model: data.model,
-        tokens: data.prompt_tokens + data.completion_tokens,
-      });
-    }
-  } catch (e) {
-    loadingEl.remove();
-    addMessage('bot', 'Failed to connect to the RAG server. Please ensure the server is running.', null, null);
-  }
+    if (data.error) { addMessage('bot', 'Error: ' + data.error); }
+    else { addMessage('bot', data.answer, data.sources, { confidence: data.confidence, model: data.model, tokens: data.prompt_tokens + data.completion_tokens }); }
+  } catch (e) { loadingEl.remove(); addMessage('bot', 'Failed to connect. Is the server running?'); }
 
   isLoading = false;
   document.getElementById('send-btn').disabled = false;
   input.focus();
 }
 
-async function ingestDocument() {
-  const text = document.getElementById('ingest-text').value.trim();
-  const source = document.getElementById('ingest-source').value.trim() || 'user-input';
-
-  if (!text) {
-    showToast('Please enter some text content', 'error');
-    showIngestStatus('❌ Content field is empty — please paste some text', 'error');
-    document.getElementById('ingest-text').focus();
-    return;
-  }
-
-  if (text.length < 20) {
-    showToast('Text is too short — add more content', 'error');
-    showIngestStatus('❌ Text must be at least 20 characters for meaningful chunking', 'error');
-    return;
-  }
-
-  const btn = document.getElementById('btn-ingest');
-  btn.disabled = true;
-  btn.textContent = 'Ingesting...';
-  btn.classList.add('loading');
-  showIngestStatus('⏳ Processing and embedding text...', 'info');
-
-  try {
-    const res = await fetch('/api/ingest', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text, source }),
-    });
-    const data = await res.json();
-
-    if (data.error) {
-      showToast('Error: ' + data.error, 'error');
-      showIngestStatus('❌ ' + data.error, 'error');
-    } else {
-      showToast(`✓ Ingested "${source}" — ${data.chunks} chunks`, 'success');
-      showIngestStatus(`✓ Successfully added ${data.chunks} chunks from "${source}"`, 'success');
-      document.getElementById('ingest-text').value = '';
-      loadDocuments();
-      loadStats();
-      setTimeout(() => {
-        toggleAddDoc();
-        hideIngestStatus();
-      }, 1500);
-    }
-  } catch (e) {
-    showToast('Connection failed', 'error');
-    showIngestStatus('❌ Connection failed', 'error');
-  }
-
-  btn.disabled = false;
-  btn.textContent = '⬆ Ingest into Knowledge Base';
-  btn.classList.remove('loading');
-}
-
-async function deleteDocument(docName) {
-  try {
-    const res = await fetch('/api/delete', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: docName }),
-    });
-    const data = await res.json();
-
-    if (data.error) {
-      showToast('Error: ' + data.error, 'error');
-    } else {
-      showToast(`Removed "${docName}"`, 'success');
-      loadDocuments();
-      loadStats();
-    }
-  } catch (e) {
-    showToast('Connection failed', 'error');
-  }
-}
-
 // ═══════════════════════════════════════════
-// UI RENDERING
+// RENDER
 // ═══════════════════════════════════════════
 function renderDocuments(docs) {
   const list = document.getElementById('doc-list');
   if (!docs.length) {
-    list.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-muted);font-size:13px;">No documents yet — add one below</div>';
+    list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:12px;">No documents yet — add one below</div>';
     return;
   }
 
-  const icons = {
-    'file': '📄', 'url': '🌐', 'api': '🔗', 'database': '🗄️', 'text': '📝'
-  };
-
-  list.innerHTML = docs.map(doc => `
+  const icons = { file: '📄', url: '🌐', text: '📝', pdf: '📕', docx: '📘' };
+  list.innerHTML = docs.map(doc => {
+    const icon = icons[doc.type] || '📄';
+    const typeClass = doc.type || 'file';
+    return `
     <div class="doc-item">
-      <div class="doc-icon">${icons[doc.type] || '📄'}</div>
+      <div class="doc-icon">${icon}</div>
       <div class="doc-info">
-        <div class="doc-name">${escapeHtml(doc.name)}</div>
+        <div class="doc-name">${esc(doc.name)}</div>
         <div class="doc-meta">
           <span>${doc.chars.toLocaleString()} chars</span>
           <span class="doc-chunks">${doc.chunks} chunks</span>
+          <span class="doc-type-badge ${typeClass}">${typeClass}</span>
         </div>
       </div>
-      <button class="doc-delete" onclick="event.stopPropagation(); deleteDocument('${escapeHtml(doc.name)}')" title="Remove document">✕</button>
-    </div>
-  `).join('');
+      <button class="doc-delete" onclick="event.stopPropagation(); deleteDocument('${esc(doc.name)}')" title="Remove">✕</button>
+    </div>`;
+  }).join('');
 }
 
 function addMessage(role, text, sources, meta) {
-  const container = document.getElementById('chat-messages');
-  const msg = document.createElement('div');
-  msg.className = 'msg';
+  const c = document.getElementById('chat-messages');
+  const m = document.createElement('div');
+  m.className = 'msg';
 
-  let sourcesHtml = '';
+  let srcHtml = '';
   if (sources && sources.length) {
-    const sourceItems = sources.map(s => `
-      <div class="source-item">
-        <div class="source-item-header">
-          <span class="source-name">📄 ${escapeHtml(s.source)}</span>
-          <span class="source-score">${(s.score * 100).toFixed(1)}%</span>
-        </div>
-        <div class="source-text">${escapeHtml(s.text)}</div>
+    srcHtml = `<div class="msg-sources">
+      <div class="msg-sources-header" onclick="this.parentElement.classList.toggle('collapsed')">📎 ${sources.length} source${sources.length>1?'s':''} retrieved <span style="margin-left:auto;font-size:10px;">▼</span></div>
+      <div class="sources-body">${sources.map(s => `
+        <div class="source-item">
+          <div class="source-item-header"><span class="source-name">📄 ${esc(s.source)}</span><span class="source-score">${(s.score*100).toFixed(1)}%</span></div>
+          <div class="source-text">${esc(s.text)}</div>
+        </div>`).join('')}
       </div>
-    `).join('');
-
-    sourcesHtml = `
-      <div class="msg-sources">
-        <div class="msg-sources-header" onclick="this.parentElement.classList.toggle('collapsed')">
-          📎 ${sources.length} source${sources.length > 1 ? 's' : ''} retrieved
-          <span style="margin-left:auto;font-size:10px;">▼</span>
-        </div>
-        <div class="sources-body">${sourceItems}</div>
-      </div>
-    `;
+    </div>`;
   }
 
   let metaHtml = '';
   if (meta) {
-    metaHtml = `
-      <div class="msg-meta">
-        <span class="meta-badge" title="Retrieval confidence">
-          📊 ${(meta.confidence * 100).toFixed(1)}% confidence
-        </span>
-        <span class="meta-badge" title="Model used">
-          🤖 ${meta.model}
-        </span>
-        <span class="meta-badge" title="Total tokens">
-          📝 ${meta.tokens} tokens
-        </span>
-      </div>
-    `;
+    metaHtml = `<div class="msg-meta">
+      <span class="meta-badge">📊 ${(meta.confidence*100).toFixed(1)}% confidence</span>
+      <span class="meta-badge">🤖 ${meta.model}</span>
+      <span class="meta-badge">📝 ${meta.tokens} tokens</span>
+    </div>`;
   }
 
-  if (role === 'user') {
-    msg.innerHTML = `
-      <div class="msg-avatar user">👤</div>
-      <div class="msg-body">
-        <div class="msg-sender">You</div>
-        <div class="msg-content user-msg">${escapeHtml(text)}</div>
-      </div>
-    `;
-  } else {
-    msg.innerHTML = `
-      <div class="msg-avatar bot">R</div>
-      <div class="msg-body">
-        <div class="msg-sender">RAGForge</div>
-        <div class="msg-content">${escapeHtml(text)}</div>
-        ${sourcesHtml}
-        ${metaHtml}
-      </div>
-    `;
-  }
+  m.innerHTML = role === 'user'
+    ? `<div class="msg-avatar user">👤</div><div class="msg-body"><div class="msg-sender">You</div><div class="msg-content user-msg">${esc(text)}</div></div>`
+    : `<div class="msg-avatar bot">R</div><div class="msg-body"><div class="msg-sender">RAGForge</div><div class="msg-content">${esc(text)}</div>${srcHtml}${metaHtml}</div>`;
 
-  container.appendChild(msg);
-  container.scrollTop = container.scrollHeight;
+  c.appendChild(m);
+  c.scrollTop = c.scrollHeight;
 }
 
 function addLoading() {
-  const container = document.getElementById('chat-messages');
-  const msg = document.createElement('div');
-  msg.className = 'msg';
-  msg.innerHTML = `
-    <div class="msg-avatar bot">R</div>
-    <div class="msg-body">
-      <div class="msg-sender">RAGForge</div>
-      <div class="msg-content">
-        <div class="loading-dots">
-          <span></span><span></span><span></span>
-        </div>
-      </div>
-    </div>
-  `;
-  container.appendChild(msg);
-  container.scrollTop = container.scrollHeight;
-  return msg;
+  const c = document.getElementById('chat-messages');
+  const m = document.createElement('div');
+  m.className = 'msg';
+  m.innerHTML = `<div class="msg-avatar bot">R</div><div class="msg-body"><div class="msg-sender">RAGForge</div><div class="msg-content"><div class="loading-dots"><span></span><span></span><span></span></div></div></div>`;
+  c.appendChild(m);
+  c.scrollTop = c.scrollHeight;
+  return m;
 }
 
 // ═══════════════════════════════════════════
 // INTERACTIONS
 // ═══════════════════════════════════════════
-function handleKeyDown(e) {
-  if (e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault();
-    sendQuery();
-  }
-}
-
-function autoResize(el) {
-  el.style.height = 'auto';
-  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
-}
-
-function askStarter(btn) {
-  const question = btn.textContent.trim().replace('→', '').trim();
-  document.getElementById('query-input').value = question;
-  sendQuery();
-}
-
-function toggleAddDoc() {
-  const form = document.getElementById('add-doc-form');
-  const icon = document.getElementById('add-toggle-icon');
-  const text = document.getElementById('add-toggle-text');
-  const isOpen = form.classList.toggle('active');
-  icon.textContent = isOpen ? '−' : '+';
-  text.textContent = isOpen ? 'Close' : 'Add Document';
-}
+function handleKeyDown(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendQuery(); } }
+function autoResize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 120) + 'px'; }
+function askStarter(btn) { document.getElementById('query-input').value = btn.textContent.trim().replace('→','').trim(); sendQuery(); }
 
 function clearChat() {
-  const container = document.getElementById('chat-messages');
-  container.innerHTML = '';
-  // Re-add welcome state
-  container.innerHTML = `
+  document.getElementById('chat-messages').innerHTML = `
     <div class="welcome-state" id="welcome-state">
       <div class="welcome-icon">🔍</div>
       <h2 class="welcome-h2">Ask anything</h2>
-      <p class="welcome-p">
-        Your knowledge base is loaded with documents. Ask a question and RAGForge will retrieve relevant context and generate an answer.
-      </p>
+      <p class="welcome-p">Your knowledge base is loaded with documents. Ask a question and RAGForge will retrieve relevant context and generate an answer.</p>
       <div class="starter-questions">
-        <button class="starter-q" onclick="askStarter(this)">
-          <span class="starter-q-icon">→</span>
-          What is FastAPI and what makes it fast?
-        </button>
-        <button class="starter-q" onclick="askStarter(this)">
-          <span class="starter-q-icon">→</span>
-          Tell me about Qdrant vector database
-        </button>
-        <button class="starter-q" onclick="askStarter(this)">
-          <span class="starter-q-icon">→</span>
-          How does RAGForge work?
-        </button>
-        <button class="starter-q" onclick="askStarter(this)">
-          <span class="starter-q-icon">→</span>
-          What are popular machine learning frameworks?
-        </button>
+        <button class="starter-q" onclick="askStarter(this)"><span class="starter-q-icon">→</span> What is FastAPI and what makes it fast?</button>
+        <button class="starter-q" onclick="askStarter(this)"><span class="starter-q-icon">→</span> Tell me about Qdrant vector database</button>
+        <button class="starter-q" onclick="askStarter(this)"><span class="starter-q-icon">→</span> How does RAGForge work?</button>
+        <button class="starter-q" onclick="askStarter(this)"><span class="starter-q-icon">→</span> What are popular machine learning frameworks?</button>
       </div>
-    </div>
-  `;
+    </div>`;
 }
 
 // ═══════════════════════════════════════════
-// TOASTS
+// TOASTS & UTILS
 // ═══════════════════════════════════════════
 function showToast(msg, type = 'success') {
-  const container = document.getElementById('toast-container');
-  const toast = document.createElement('div');
-  toast.className = `toast ${type}`;
-  toast.innerHTML = `<span>${type === 'success' ? '✓' : '✕'}</span> ${escapeHtml(msg)}`;
-  container.appendChild(toast);
-  setTimeout(() => {
-    toast.style.opacity = '0';
-    toast.style.transform = 'translateX(20px)';
-    toast.style.transition = 'all 0.3s';
-    setTimeout(() => toast.remove(), 300);
-  }, 3000);
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = `<span>${type==='success'?'✓':'✕'}</span> ${esc(msg)}`;
+  c.appendChild(t);
+  setTimeout(() => { t.style.opacity='0'; t.style.transform='translateX(20px)'; t.style.transition='all 0.3s'; setTimeout(()=>t.remove(),300); }, 3000);
 }
 
-// ═══════════════════════════════════════════
-// UTILS
-// ═══════════════════════════════════════════
-function escapeHtml(str) {
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
-}
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 </script>
 </body>
 </html>
