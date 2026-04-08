@@ -1,0 +1,54 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ragforge"
+version = "0.1.0"
+description = "Multi-Source RAG SDK — build retrieval-augmented generation pipelines with pluggable embeddings, LLMs, and vector stores"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+authors = [{name = "RAGForge Contributors"}]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+dependencies = [
+    "qdrant-client>=1.7.0",
+    "requests>=2.28.0",
+]
+
+[project.optional-dependencies]
+openai = ["openai>=1.0.0"]
+anthropic = ["anthropic>=0.30.0"]
+huggingface = ["sentence-transformers>=2.2.0"]
+ollama = ["aiohttp>=3.9.0"]
+pdf = ["pymupdf>=1.23.0"]
+docx = ["python-docx>=1.0.0"]
+web = ["beautifulsoup4>=4.12.0", "requests>=2.28.0"]
+database = ["sqlalchemy>=2.0.0"]
+all = [
+    "openai>=1.0.0",
+    "anthropic>=0.30.0",
+    "sentence-transformers>=2.2.0",
+    "aiohttp>=3.9.0",
+    "pymupdf>=1.23.0",
+    "python-docx>=1.0.0",
+    "beautifulsoup4>=4.12.0",
+    "sqlalchemy>=2.0.0",
+]
+
+[project.urls]
+Repository = "https://github.com/ragforge/ragforge"
+Documentation = "https://ragforge.dev/docs"
+
+[tool.setuptools.packages.find]
+include = ["ragforge*"]

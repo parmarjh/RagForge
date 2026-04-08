@@ -1,0 +1,1744 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CodePilot Agent — Configuration Plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+/* === CSS VARIABLES === */
+:root {
+  --font-body: 'DM Sans', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-display: 'Instrument Serif', serif;
+  --sidebar-w: 280px;
+  --transition-speed: 0.35s;
+}
+[data-theme="dark"] {
+  --bg-primary: #0c0e12;
+  --bg-secondary: #13161c;
+  --bg-tertiary: #1a1e26;
+  --bg-code: #0d1017;
+  --bg-sidebar: #0f1116;
+  --border-color: #1e2330;
+  --border-hover: #2a3040;
+  --text-primary: #e0e4ec;
+  --text-secondary: #8890a0;
+  --text-muted: #555e70;
+  --accent: #6e8efb;
+  --accent-glow: rgba(110,142,251,0.15);
+  --accent-secondary: #a78bfa;
+  --success: #34d399;
+  --warning: #fbbf24;
+  --error: #f87171;
+  --tag-bg: rgba(110,142,251,0.1);
+  --tag-border: rgba(110,142,251,0.2);
+  --scrollbar-thumb: #2a3040;
+  --shadow: 0 1px 3px rgba(0,0,0,0.4);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.5);
+  --noise-opacity: 0.03;
+  --diagram-node: #1a1e26;
+  --diagram-stroke: #2a3040;
+}
+[data-theme="light"] {
+  --bg-primary: #f5f6f8;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #eef0f4;
+  --bg-code: #f8f9fb;
+  --bg-sidebar: #ffffff;
+  --border-color: #dde1e8;
+  --border-hover: #c5cbda;
+  --text-primary: #1a1e26;
+  --text-secondary: #5a6378;
+  --text-muted: #9ca3b4;
+  --accent: #4f6ef7;
+  --accent-glow: rgba(79,110,247,0.1);
+  --accent-secondary: #7c5cf7;
+  --success: #059669;
+  --warning: #d97706;
+  --error: #dc2626;
+  --tag-bg: rgba(79,110,247,0.06);
+  --tag-border: rgba(79,110,247,0.15);
+  --scrollbar-thumb: #c5cbda;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.1);
+  --noise-opacity: 0.015;
+  --diagram-node: #ffffff;
+  --diagram-stroke: #dde1e8;
+}
+
+/* === RESET & BASE === */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; scrollbar-width: thin; scrollbar-color: var(--scrollbar-thumb) transparent; }
+body {
+  font-family: var(--font-body);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.65;
+  transition: background var(--transition-speed), color var(--transition-speed);
+  overflow-x: hidden;
+}
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
+
+/* === NOISE TEXTURE OVERLAY === */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  opacity: var(--noise-opacity);
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* === SIDEBAR === */
+.sidebar {
+  position: fixed; top: 0; left: 0;
+  width: var(--sidebar-w); height: 100vh;
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border-color);
+  display: flex; flex-direction: column;
+  z-index: 100;
+  transition: background var(--transition-speed), border-color var(--transition-speed), transform 0.3s;
+}
+.sidebar-header {
+  padding: 28px 24px 20px;
+  border-bottom: 1px solid var(--border-color);
+}
+.sidebar-logo {
+  font-family: var(--font-display);
+  font-size: 26px;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+.sidebar-logo span { color: var(--accent); }
+.sidebar-version {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+.sidebar-nav { flex: 1; overflow-y: auto; padding: 16px 0; }
+.sidebar-nav::-webkit-scrollbar { width: 0; }
+.nav-section-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  padding: 12px 24px 6px;
+}
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 24px;
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+.nav-item:hover { color: var(--text-primary); background: var(--accent-glow); }
+.nav-item.active {
+  color: var(--accent);
+  border-left-color: var(--accent);
+  background: var(--accent-glow);
+}
+.nav-item .nav-icon { width: 16px; text-align: center; opacity: 0.6; font-size: 14px; }
+.nav-item.active .nav-icon { opacity: 1; }
+.nav-sub { padding-left: 50px; font-size: 12.5px; }
+
+/* Theme toggle in sidebar footer */
+.sidebar-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--border-color);
+}
+.theme-toggle {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  width: 100%;
+  transition: all 0.2s;
+}
+.theme-toggle:hover { border-color: var(--border-hover); }
+.theme-toggle-track {
+  width: 36px; height: 20px;
+  background: var(--text-muted);
+  border-radius: 10px;
+  position: relative;
+  transition: background 0.3s;
+}
+.theme-toggle-track::after {
+  content: '';
+  position: absolute;
+  width: 16px; height: 16px;
+  background: var(--bg-primary);
+  border-radius: 50%;
+  top: 2px; left: 2px;
+  transition: transform 0.3s;
+}
+[data-theme="light"] .theme-toggle-track { background: var(--accent); }
+[data-theme="light"] .theme-toggle-track::after { transform: translateX(16px); }
+.theme-toggle-label {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* === MAIN CONTENT === */
+.main { margin-left: var(--sidebar-w); min-height: 100vh; }
+.content-wrapper { max-width: 920px; margin: 0 auto; padding: 48px 48px 120px; }
+
+/* === HERO === */
+.hero {
+  padding: 64px 0 48px;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 56px;
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--accent);
+  background: var(--tag-bg);
+  border: 1px solid var(--tag-border);
+  padding: 5px 12px;
+  border-radius: 20px;
+  margin-bottom: 20px;
+}
+.hero h1 {
+  font-family: var(--font-display);
+  font-size: 48px;
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  margin-bottom: 16px;
+}
+.hero h1 em { color: var(--accent); font-style: italic; }
+.hero-desc {
+  font-size: 16px;
+  color: var(--text-secondary);
+  max-width: 600px;
+  line-height: 1.7;
+}
+.hero-meta {
+  display: flex; gap: 24px;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border-color);
+}
+.hero-meta-item {
+  display: flex; flex-direction: column; gap: 2px;
+}
+.hero-meta-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+.hero-meta-value {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+/* === SECTION STYLES === */
+.doc-section {
+  margin-bottom: 64px;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.doc-section.visible { opacity: 1; transform: translateY(0); }
+.section-header {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 8px;
+}
+.section-number {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--accent);
+  background: var(--tag-bg);
+  border: 1px solid var(--tag-border);
+  padding: 3px 10px;
+  border-radius: 4px;
+}
+.section-header h2 {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+.section-desc {
+  color: var(--text-secondary);
+  font-size: 14.5px;
+  margin-bottom: 32px;
+  max-width: 640px;
+}
+
+/* === SUBSECTION === */
+.subsection { margin-bottom: 40px; }
+.subsection-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  display: flex; align-items: center; gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+.subsection-title .chevron {
+  font-size: 12px;
+  transition: transform 0.2s;
+  color: var(--text-muted);
+}
+.subsection-title.collapsed .chevron { transform: rotate(-90deg); }
+.subsection-content { transition: max-height 0.3s ease; overflow: hidden; }
+.subsection-content.collapsed { max-height: 0 !important; }
+.subsection p, .subsection li {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.75;
+}
+.subsection ul, .subsection ol { padding-left: 20px; margin: 8px 0; }
+.subsection li { margin-bottom: 4px; }
+
+/* === CODE BLOCKS === */
+.code-block {
+  position: relative;
+  background: var(--bg-code);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  margin: 16px 0;
+  overflow: hidden;
+}
+.code-block-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 16px;
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border-color);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--text-muted);
+}
+.copy-btn {
+  display: flex; align-items: center; gap: 5px;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+.copy-btn.copied { border-color: var(--success); color: var(--success); }
+.code-block pre {
+  padding: 16px;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.7;
+  tab-size: 2;
+}
+/* Syntax colors */
+.kw { color: #c678dd; } /* keyword */
+.str { color: #98c379; } /* string */
+.num { color: #d19a66; } /* number */
+.cmt { color: #5c6370; font-style: italic; } /* comment */
+.fn { color: #61afef; } /* function */
+.type { color: #e5c07b; } /* type */
+.op { color: #56b6c2; } /* operator */
+.param { color: #e06c75; } /* parameter */
+.key { color: #e06c75; } /* JSON key */
+.bool { color: #d19a66; } /* boolean */
+[data-theme="light"] .kw { color: #7c3aed; }
+[data-theme="light"] .str { color: #16a34a; }
+[data-theme="light"] .num { color: #c2410c; }
+[data-theme="light"] .cmt { color: #9ca3af; }
+[data-theme="light"] .fn { color: #2563eb; }
+[data-theme="light"] .type { color: #b45309; }
+[data-theme="light"] .op { color: #0891b2; }
+[data-theme="light"] .param { color: #dc2626; }
+[data-theme="light"] .key { color: #dc2626; }
+[data-theme="light"] .bool { color: #c2410c; }
+
+/* === CONFIG TABLE === */
+.config-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 13.5px;
+}
+.config-table th {
+  text-align: left;
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  padding: 10px 16px;
+  border-bottom: 2px solid var(--border-color);
+}
+.config-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  vertical-align: top;
+}
+.config-table tr:last-child td { border-bottom: none; }
+.config-table code {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  background: var(--tag-bg);
+  padding: 2px 7px;
+  border-radius: 4px;
+  color: var(--accent);
+}
+
+/* === DIAGRAM === */
+.diagram-container {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 40px 32px;
+  margin: 20px 0;
+  overflow-x: auto;
+}
+.arch-diagram {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-width: 700px;
+}
+.arch-node {
+  background: var(--diagram-node);
+  border: 1px solid var(--diagram-stroke);
+  border-radius: 10px;
+  padding: 16px 20px;
+  text-align: center;
+  min-width: 110px;
+  transition: all 0.3s;
+}
+.arch-node:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 20px var(--accent-glow);
+  transform: translateY(-2px);
+}
+.arch-node-icon { font-size: 24px; margin-bottom: 6px; }
+.arch-node-label { font-size: 12px; font-weight: 600; }
+.arch-node-sub { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+.arch-arrow {
+  color: var(--text-muted);
+  font-size: 20px;
+  flex-shrink: 0;
+  animation: arrowPulse 2s ease infinite;
+}
+@keyframes arrowPulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; color: var(--accent); }
+}
+.tools-group {
+  display: flex; flex-direction: column; gap: 8px;
+}
+.tools-group .arch-node { min-width: 100px; padding: 10px 14px; }
+
+/* === FLOWCHART === */
+.flowchart {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  padding: 32px 0;
+}
+.flow-step {
+  display: flex; align-items: center; gap: 14px;
+  background: var(--diagram-node);
+  border: 1px solid var(--diagram-stroke);
+  border-radius: 10px;
+  padding: 14px 24px;
+  min-width: 280px;
+  transition: all 0.3s;
+}
+.flow-step:hover { border-color: var(--accent); transform: scale(1.02); }
+.flow-step-num {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  background: var(--tag-bg);
+  width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+.flow-step-text { font-size: 13.5px; font-weight: 500; }
+.flow-step-sub { font-size: 11px; color: var(--text-muted); }
+.flow-arrow-down {
+  color: var(--text-muted);
+  font-size: 16px;
+  padding: 4px 0;
+}
+
+/* === CHAT DEMO === */
+.chat-container {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  overflow: hidden;
+  margin: 20px 0;
+}
+.chat-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 14px 20px;
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border-color);
+}
+.chat-header-title { font-size: 13px; font-weight: 600; }
+.chat-tabs { display: flex; gap: 4px; }
+.chat-tab {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 5px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.chat-tab:hover { border-color: var(--border-hover); }
+.chat-tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.chat-messages { padding: 20px; max-height: 500px; overflow-y: auto; }
+.chat-msg {
+  display: flex; gap: 12px;
+  margin-bottom: 20px;
+  animation: msgIn 0.4s ease;
+}
+@keyframes msgIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.chat-avatar {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.chat-avatar.user { background: var(--tag-bg); border: 1px solid var(--tag-border); }
+.chat-avatar.agent { background: linear-gradient(135deg, var(--accent), var(--accent-secondary)); color: #fff; }
+.chat-bubble {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 13.5px;
+  line-height: 1.65;
+  max-width: 85%;
+  color: var(--text-secondary);
+}
+.chat-bubble .code-block { margin: 10px 0 4px; }
+.chat-bubble .code-block pre { font-size: 12px; }
+.chat-input-area {
+  display: flex; gap: 10px;
+  padding: 16px 20px;
+  border-top: 1px solid var(--border-color);
+}
+.chat-input {
+  flex: 1;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 0.2s;
+}
+.chat-input:focus { border-color: var(--accent); }
+.chat-send-btn {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.chat-send-btn:hover { opacity: 0.85; }
+
+/* === INFO CARD === */
+.info-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 20px;
+  margin: 12px 0;
+}
+.info-card-title {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  display: flex; align-items: center; gap: 8px;
+}
+.info-card p { font-size: 13.5px; color: var(--text-secondary); }
+
+/* === TAG === */
+.tag {
+  display: inline-flex;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 3px 9px;
+  border-radius: 4px;
+  background: var(--tag-bg);
+  border: 1px solid var(--tag-border);
+  color: var(--accent);
+}
+
+/* === CALLOUT === */
+.callout {
+  border-left: 3px solid var(--accent);
+  background: var(--accent-glow);
+  padding: 14px 18px;
+  border-radius: 0 8px 8px 0;
+  margin: 16px 0;
+  font-size: 13.5px;
+  color: var(--text-secondary);
+}
+.callout.warn { border-left-color: var(--warning); background: rgba(251,191,36,0.06); }
+.callout.err { border-left-color: var(--error); background: rgba(248,113,113,0.06); }
+
+/* === GRID === */
+.card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; }
+.card-grid .info-card { margin: 0; }
+
+/* === MOBILE === */
+.mobile-header {
+  display: none;
+  position: fixed; top: 0; left: 0; right: 0;
+  background: var(--bg-sidebar);
+  border-bottom: 1px solid var(--border-color);
+  padding: 12px 16px;
+  z-index: 101;
+  justify-content: space-between;
+  align-items: center;
+}
+.mobile-menu-btn {
+  background: none; border: none;
+  color: var(--text-primary);
+  font-size: 20px;
+  cursor: pointer;
+}
+@media (max-width: 900px) {
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); box-shadow: var(--shadow-lg); }
+  .mobile-header { display: flex; }
+  .main { margin-left: 0; }
+  .content-wrapper { padding: 80px 20px 100px; }
+  .hero h1 { font-size: 32px; }
+  .card-grid { grid-template-columns: 1fr; }
+  .arch-diagram { min-width: auto; flex-wrap: wrap; justify-content: center; }
+}
+
+/* === PROMPT BLOCK (full system prompt) === */
+.prompt-block {
+  position: relative;
+  background: var(--bg-code);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  margin: 16px 0;
+}
+.prompt-block-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 16px;
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border-color);
+}
+.prompt-block-title {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+}
+.prompt-block pre {
+  padding: 20px;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  color: var(--text-secondary);
+  max-height: 500px;
+  overflow-y: auto;
+}
+</style>
+</head>
+<body>
+
+<!-- MOBILE HEADER -->
+<div class="mobile-header">
+  <span class="sidebar-logo" style="font-size:18px">Code<span>Pilot</span></span>
+  <button class="mobile-menu-btn" onclick="document.querySelector('.sidebar').classList.toggle('open')">&#9776;</button>
+</div>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">Code<span>Pilot</span> Agent</div>
+    <div class="sidebar-version">v2.4.0 &middot; Configuration Plan</div>
+  </div>
+  <div class="sidebar-nav">
+    <div class="nav-section-label">Overview</div>
+    <a class="nav-item active" href="#hero"><span class="nav-icon">&#9670;</span> Introduction</a>
+
+    <div class="nav-section-label">Specification</div>
+    <a class="nav-item" href="#system-prompt"><span class="nav-icon">&#9998;</span> System Prompt</a>
+    <a class="nav-item nav-sub" href="#sp-identity">Identity &amp; Persona</a>
+    <a class="nav-item nav-sub" href="#sp-behavior">Behavior Rules</a>
+    <a class="nav-item nav-sub" href="#sp-code">Code Instructions</a>
+    <a class="nav-item nav-sub" href="#sp-safety">Safety Rails</a>
+    <a class="nav-item nav-sub" href="#sp-template">Full Prompt Template</a>
+
+    <a class="nav-item" href="#architecture"><span class="nav-icon">&#9881;</span> Architecture</a>
+    <a class="nav-item nav-sub" href="#arch-diagram">System Diagram</a>
+    <a class="nav-item nav-sub" href="#arch-components">Components</a>
+    <a class="nav-item nav-sub" href="#arch-api">API Schema</a>
+    <a class="nav-item nav-sub" href="#arch-model">Model Config</a>
+    <a class="nav-item nav-sub" href="#arch-tools">Tool Schemas</a>
+    <a class="nav-item nav-sub" href="#arch-memory">Memory Strategy</a>
+
+    <a class="nav-item" href="#workflow"><span class="nav-icon">&#8635;</span> Workflow</a>
+    <a class="nav-item nav-sub" href="#wf-loop">Agent Loop</a>
+    <a class="nav-item nav-sub" href="#wf-errors">Error Handling</a>
+    <a class="nav-item nav-sub" href="#wf-multi">Multi-Turn Mgmt</a>
+    <a class="nav-item nav-sub" href="#wf-codegen">Code Gen Pipeline</a>
+    <a class="nav-item nav-sub" href="#wf-review">Code Review</a>
+
+    <a class="nav-item" href="#demo"><span class="nav-icon">&#9655;</span> Interactive Demo</a>
+    <a class="nav-item nav-sub" href="#demo-chat">Chat Simulation</a>
+    <a class="nav-item nav-sub" href="#demo-arch">Live Diagrams</a>
+  </div>
+  <div class="sidebar-footer">
+    <div class="theme-toggle" onclick="toggleTheme()">
+      <div class="theme-toggle-track"></div>
+      <span class="theme-toggle-label">Toggle theme</span>
+    </div>
+  </div>
+</nav>
+
+<!-- MAIN CONTENT -->
+<main class="main">
+<div class="content-wrapper">
+
+<!-- HERO -->
+<section class="hero" id="hero">
+  <div class="hero-badge">&#9670; CONFIGURATION PLAN</div>
+  <h1>Code<em>Pilot</em> Agent<br>Full Specification</h1>
+  <p class="hero-desc">
+    Complete configuration plan for the CodePilot AI Code Assistant &mdash; covering system prompt engineering, technical architecture, workflow orchestration, and interactive demonstrations.
+  </p>
+  <div class="hero-meta">
+    <div class="hero-meta-item">
+      <span class="hero-meta-label">Version</span>
+      <span class="hero-meta-value">2.4.0</span>
+    </div>
+    <div class="hero-meta-item">
+      <span class="hero-meta-label">Last Updated</span>
+      <span class="hero-meta-value">2026-03-15</span>
+    </div>
+    <div class="hero-meta-item">
+      <span class="hero-meta-label">Base Model</span>
+      <span class="hero-meta-value">Claude Opus 4</span>
+    </div>
+    <div class="hero-meta-item">
+      <span class="hero-meta-label">Status</span>
+      <span class="hero-meta-value" style="color:var(--success)">Production</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== -->
+<!-- SECTION 1: SYSTEM PROMPT -->
+<!-- ============================== -->
+<section class="doc-section" id="system-prompt">
+  <div class="section-header">
+    <span class="section-number">01</span>
+    <h2>System Prompt Design</h2>
+  </div>
+  <p class="section-desc">
+    The system prompt defines CodePilot's core identity, behavioral constraints, code-specific directives, and safety policies. Every interaction is governed by this foundational configuration.
+  </p>
+
+  <!-- Identity & Persona -->
+  <div class="subsection" id="sp-identity">
+    <div class="subsection-title"><span class="chevron">&#9662;</span> Core Identity &amp; Persona</div>
+    <div class="subsection-content">
+      <p>CodePilot operates as an expert-level software engineer with deep knowledge across the full development stack. The persona is calibrated to be direct, technically precise, and pragmatically opinionated.</p>
+      <div class="card-grid">
+        <div class="info-card">
+          <div class="info-card-title">&#9670; Name &amp; Role</div>
+          <p><strong>CodePilot</strong> &mdash; AI Code Assistant specializing in code generation, debugging, architecture review, and developer productivity. Acts as a senior pair-programming partner.</p>
+        </div>
+        <div class="info-card">
+          <div class="info-card-title">&#9670; Personality Traits</div>
+          <p>Precise, concise, and technically rigorous. Prefers working code over theoretical discussion. Admits uncertainty rather than guessing. Uses professional tone without being overly formal.</p>
+        </div>
+        <div class="info-card">
+          <div class="info-card-title">&#9670; Communication Style</div>
+          <p>Leads with code, follows with explanation. Uses inline comments for complex logic. Structures responses with clear sections when multiple topics are addressed.</p>
+        </div>
+        <div class="info-card">
+          <div class="info-card-title">&#9670; Knowledge Domains</div>
+          <p>Systems programming, web development (frontend &amp; backend), databases, DevOps/CI-CD, cloud infrastructure, algorithms, security, and software architecture patterns.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Behavioral Guidelines -->
+  <div class="subsection" id="sp-behavior">
+    <div class="subsection-title"><span class="chevron">&#9662;</span> Behavioral Guidelines &amp; Constraints</div>
+    <div class="subsection-content">
+      <div class="info-card">
+        <div class="info-card-title">Mandatory Behaviors</div>
+        <ul>
+          <li><strong>Always show working code</strong> &mdash; every code suggestion must be syntactically valid and runnable in context</li>
+          <li><strong>Explain trade-offs</strong> &mdash; when multiple approaches exist, present pros/cons before recommending</li>
+          <li><strong>Respect existing patterns</strong> &mdash; match the codebase's existing conventions (naming, structure, formatting)</li>
+          <li><strong>Cite sources</strong> &mdash; reference documentation, RFCs, or language specs when making non-obvious claims</li>
+          <li><strong>Request context</strong> &mdash; ask for clarification when requirements are ambiguous rather than assuming</li>
+          <li><strong>Version awareness</strong> &mdash; specify language/framework versions when behavior differs across versions</li>
+        </ul>
+      </div>
+      <div class="info-card" style="margin-top:12px">
+        <div class="info-card-title">Prohibited Behaviors</div>
+        <ul>
+          <li>Never generate code that intentionally introduces security vulnerabilities</li>
+          <li>Never fabricate library names, API endpoints, or function signatures</li>
+          <li>Never claim certainty about runtime behavior without verifiable evidence</li>
+          <li>Never produce placeholder/stub code without clearly marking it as incomplete</li>
+          <li>Never ignore error handling in production-targeted code</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Code-Specific Instructions -->
+  <div class="subsection" id="sp-code">
+    <div class="subsection-title"><span class="chevron">&#9662;</span> Code-Specific Instructions</div>
+    <div class="subsection-content">
+      <p>Language-specific conventions and framework guidelines enforced by the agent.</p>
+      <div class="code-block">
+        <div class="code-block-header"><span>supported-languages.yaml</span><button class="copy-btn" onclick="copyCode(this)">&#9112; Copy</button></div>
+        <pre><span class="key">languages</span>:
+  <span class="key">tier_1</span>:  <span class="cmt"># Deep expertise, full generation</span>
+    - <span class="str">Python 3.10+</span>
+    - <span class="str">TypeScript 5.x</span>
+    - <span class="str">JavaScript (ES2022+)</span>
+    - <span class="str">Rust 1.75+</span>
+    - <span class="str">Go 1.21+</span>
+  <span class="key">tier_2</span>:  <span class="cmt"># Strong support, may flag edge cases</span>
+    - <span class="str">Java 17+</span>
+    - <span class="str">C# (.NET 8)</span>
+    - <span class="str">C/C++ (C17/C++20)</span>
+    - <span class="str">Ruby 3.x</span>
+    - <span class="str">Swift 5.9+</span>
+
+<span class="key">frameworks</span>:
+  <span class="key">frontend</span>: [<span class="str">React 18</span>, <span class="str">Next.js 14</span>, <span class="str">Vue 3</span>, <span class="str">Svelte 4</span>]
+  <span class="key">backend</span>:  [<span class="str">FastAPI</span>, <span class="str">Express</span>, <span class="str">Actix-web</span>, <span class="str">Gin</span>, <span class="str">Spring Boot</span>]
+  <span class="key">database</span>: [<span class="str">PostgreSQL</span>, <span class="str">Redis</span>, <span class="str">MongoDB</span>, <span class="str">SQLite</span>]
+  <span class="key">infra</span>:    [<span class="str">Docker</span>, <span class="str">Terraform</span>, <span class="str">K8s</span>, <span class="str">AWS CDK</span>]
+
+<span class="key">style_conventions</span>:
+  <span class="key">python</span>: <span class="str">"PEP 8 + Black formatter + type hints required"</span>
+  <span class="key">typescript</span>: <span class="str">"strict mode, explicit return types, no any"</span>
+  <span class="key">rust</span>: <span class="str">"clippy lints, idiomatic Result/Option usage"</span>
+  <span class="key">go</span>: <span class="str">"gofmt, effective Go conventions, error wrapping"</span></pre>
+      </div>
+      <div class="callout">When generating code, CodePilot infers the project's existing style from provided context. If no context is given, it defaults to the conventions listed here.</div>
+    </div>
+  </div>
+
+  <!-- Safety Rails -->
+  <div class="subsection" id="sp-safety">
+    <div class="subsection-title"><span class="chevron">&#9662;</span> Safety Rails &amp; Content Policies</div>
+    <div class="subsection-content">
+      <div class="card-grid">
+        <div class="info-card">
+          <div class="info-card-title" style="color:var(--error)">&#9888; Hard Blocks</div>
+          <ul>
+            <li>Malware, exploits, or weaponized code</li>
+            <li>Credential harvesting or phishing tools</li>
+            <li>Code designed to bypass authentication</li>
+            <li>DDoS tooling or network attack vectors</li>
+            <li>Privacy-violating surveillance code</li>
+          </ul>
+        </div>
+        <div class="info-card">
+          <div class="info-card-title" style="color:var(--warning)">&#9888; Soft Gates (Require Context)</div>
+          <ul>
+            <li>Penetration testing tools (require stated authorization)</li>
+            <li>Encryption/decryption utilities</li>
+            <li>Web scraping (must respect robots.txt)</li>
+            <li>Code interacting with system-level APIs</li>
+            <li>Authentication implementations</li>
+          </ul>
+        </div>
+      </div>
+      <div class="info-card" style="margin-top:12px">
+        <div class="info-card-title">Security-First Defaults</div>
+        <ul>
+          <li>Always use parameterized queries &mdash; never string interpolation for SQL</li>
+          <li>Sanitize all user inputs before processing</li>
+          <li>Default to <code>HTTPS</code>, <code>HttpOnly</code> cookies, and <code>SameSite=Strict</code></li>
+          <li>Use constant-time comparison for secrets and tokens</li>
+          <li>Flag deprecated or CVE-affected dependencies</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Full Prompt Template -->
+  <div class="subsection" id="sp-template">
+    <div class="subsection-title"><span class="chevron">&#9662;</span> Full System Prompt Template</div>
+    <div class="subsection-content">
+      <p>The complete system prompt injected at conversation initialization. Click <strong>Copy</strong> to use directly.</p>
+      <div class="prompt-block">
+        <div class="prompt-block-header">
+          <span class="prompt-block-title">system_prompt.txt</span>
+          <button class="copy-btn" onclick="copyCode(this)">&#9112; Copy</button>
+        </div>
+        <pre>You are CodePilot, an expert AI code assistant built for professional software engineers.
+
+## IDENTITY
+- Role: Senior pair-programming partner and code reviewer
+- Expertise: Full-stack development, systems programming, cloud architecture, DevOps
+- Disposition: Direct, precise, and pragmatically opinionated
+
+## CORE DIRECTIVES
+1. Always produce syntactically valid, runnable code
+2. Match the existing codebase conventions when context is provided
+3. Explain trade-offs when multiple approaches exist
+4. Request clarification for ambiguous requirements — never assume
+5. Include error handling in all production-targeted code
+6. Add type annotations/hints where the language supports them
+7. Flag potential security issues proactively
+8. Specify language/framework versions when behavior is version-dependent
+
+## OUTPUT FORMAT
+- Lead with code, follow with explanation
+- Use inline comments for non-obvious logic
+- Structure multi-topic responses with clear headings
+- For debugging: reproduce → diagnose → fix → explain → prevent
+
+## CODE QUALITY STANDARDS
+- Follow language-idiomatic patterns (PEP 8, gofmt, clippy, etc.)
+- Prefer immutability and pure functions where practical
+- Use descriptive variable names — no single-letter names except loop indices
+- Every function should have a clear single responsibility
+- Include docstrings/JSDoc for public APIs
+
+## SECURITY REQUIREMENTS
+- Parameterized queries only — never string interpolation in SQL
+- Sanitize all user inputs at the boundary
+- Use HTTPS, HttpOnly cookies, SameSite=Strict by default
+- Constant-time comparison for secrets and tokens
+- Flag deprecated or CVE-affected dependencies
+
+## CONSTRAINTS
+- Never fabricate library names, APIs, or function signatures
+- Never generate intentionally vulnerable code
+- Never claim certainty without evidence
+- Never produce unmarked placeholder/stub code
+- If unsure, say so — uncertainty is preferred over fabrication
+
+## TOOL USE
+When using tools, follow this sequence:
+1. Analyze the request and determine which tools are needed
+2. Plan the execution order (prefer parallel when independent)
+3. Execute tools and validate outputs
+4. Synthesize results into a coherent response
+Available tools: code_interpreter, file_system, web_search, static_analysis</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== -->
+<!-- SECTION 2: ARCHITECTURE -->
+<!-- ============================== -->
+<section class="doc-section" id="architecture">
+  <div class="section-header">
+    <span class="section-number">02</span>
+    <h2>Technical Architecture</h2>
+  </div>
+  <p class="section-desc">
+    End-to-end system architecture from user request ingestion through LLM orchestration to tool execution and response delivery.
+  </p>
+
+  <!-- Architecture Diagram -->
+  <div class="subsection" id="arch-diagram">
+    <div class="subsection-title"><span class="chevron">&#9662;</span> System Architecture Diagram</div>
+    <div class="subsection-content">
+      <p>Request flow from user input through the orchestration layer to tool execution and response delivery.</p>
+      <div class="diagram-container">
+        <div class="arch-diagram">
+          <div class="arch-node">
+            <div class="arch-node-icon">&#128100;</div>
+            <div class="arch-node-label">User</div>
+            <div class="arch-node-sub">IDE / CLI / Web</div>
+          </div>
+          <div class="arch-arrow">&#10230;</div>
+          <div class="arch-node">
+            <div class="arch-node-icon">&#9889;</div>
+            <div class="arch-node-label">API Gateway</div>
+            <div class="arch-node-sub">Auth &amp; Rate Limit</div>
+          </div>
+          <div class="arch-arrow">&#10230;</div>
+          <div class="arch-node" style="border-color:var(--accent)">
+            <div class="arch-node-icon">&#9881;</div>
+            <div class="arch-node-label">Orchestrator</div>
+            <div class="arch-node-sub">Agent Core Loop</div>
+          </div>
+          <div class="arch-arrow">&#10230;</div>
+          <div class="arch-node">
+            <div class="arch-node-icon">&#9733;</div>
+            <div class="arch-node-label">LLM</div>
+            <div class="arch-node-sub">Claude Opus 4</div>
+          </div>
+          <div class="arch-arrow">&#10231;</div>
+          <div class="tools-group">
+            <div class="arch-node">
+              <div class="arch-node-label">&#9654; Code Interpreter</div>
+            </div>
+            <div class="arch-node">
+              <div class="arch-node-label">&#128269; Web Search</div>
+            </div>
+            <div class="arch-node">
+              <div class="arch-node-label">&#128193; File System</div>
+            </div>
+            <div class="arch-node">
+              <div class="arch-node-label">&#128202; Static Analysis</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Components -->
+  <div class="subsection" id="arch-components">
+    <div class="subsection-title"><span class="chevron">&#9662;</span> Component Breakdown</div>
+    <div class="subsection-content">
+      <div class="card-grid">
+        <div class="info-card">
+          <div class="info-card-title">API Gateway</div>
+          <p>Handles authentication (JWT/API key), rate limiting (token bucket, 100 req/min), request validation, and TLS termination. Routes to the orchestrator via internal gRPC.</p>
+        </div>
+        <div class="info-card">
+          <div class="info-card-title">Agent Orchestrator</div>
+          <p>Core loop engine managing the Receive&rarr;Analyze&rarr;Plan&rarr;Execute&rarr;Review&rarr;Respond cycle. Maintains conversation state, manages tool dispatch, and handles retry logic.</p>
+        </div>
+        <div class="info-card">
+          <div class="info-card-title">LLM Interface</div>
+          <p>Abstraction layer over the model API. Handles prompt assembly, token counting, streaming responses, function call parsing, and model fallback (primary: Claude Opus 4, fallback: Sonnet).</p>
+        </div>
+        <div class="info-card">
+          <div class="info-card-title">Tool Runtime</div>
+          <p>Sandboxed execution environment for code interpreter (Docker-isolated), file system operations (scoped to workspace), web search (filtered results), and static analysis (AST-based).</p>
+        </div>
+        <div class="info-card">
+          <div class="info-card-title">Memory Store</div>
+          <p>Redis-backed session store for conversation history, with PostgreSQL for long-term memory (user preferences, project context). Implements sliding window + summarization for context management.</p>
+        </div>
+        <div class="info-card">
+          <div class="info-card-title">Observability</div>
+          <p>OpenTelemetry traces for every request, Prometheus metrics (latency, token usage, tool calls), structured logging (JSON), and alerting on error rate spikes.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- API Schema -->
+  <div class="subsection" id="arch-api">
+    <div class="subsection-title"><span class="chevron">&#9662;</span> API Schema &amp; Endpoints</div>
+    <div class="subsection-content">
+      <div class="code-block">
+        <div class="code-block-header"><span>POST /v1/chat/completions</span><button class="copy-btn" onclick="copyCode(this)">&#9112; Copy</button></div>
+        <pre><span class="cmt">// Request</span>
+{
+  <span class="key">"model"</span>: <span class="str">"codepilot-v2.4"</span>,
+  <span class="key">"messages"</span>: [
+    { <span class="key">"role"</span>: <span class="str">"system"</span>, <span class="key">"content"</span>: <span class="str">"..."</span> },
+    { <span class="key">"role"</span>: <span class="str">"user"</span>, <span class="key">"content"</span>: <span class="str">"Write a binary search in Python"</span> }
+  ],
+  <span class="key">"tools"</span>: [<span class="str">"code_interpreter"</span>, <span class="str">"file_system"</span>],
+  <span class="key">"stream"</span>: <span class="bool">true</span>,
+  <span class="key">"max_tokens"</span>: <span class="num">4096</span>,
+  <span class="key">"metadata"</span>: {
+    <span class="key">"session_id"</span>: <span class="str">"sess_abc123"</span>,
+    <span class="key">"project_context"</span>: <span class="str">"python-fastapi-backend"</span>
+  }
+}
+
+<span class="cmt">// Response (streamed SSE)</span>
+{
+  <span class="key">"id"</span>: <span class="str">"resp_xyz789"</span>,
+  <span class="key">"object"</span>: <span class="str">"chat.completion.chunk"</span>,
+  <span class="key">"model"</span>: <span class="str">"codepilot-v2.4"</span>,
+  <span class="key">"choices"</span>: [{
+    <span class="key">"delta"</span>: {
+      <span class="key">"role"</span>: <span class="str">"assistant"</span>,
+      <span class="key">"content"</span>: <span class="str">"Here's an implementation..."</span>,
+      <span class="key">"tool_calls"</span>: [{
+        <span class="key">"id"</span>: <span class="str">"tc_001"</span>,
+        <span class="key">"type"</span>: <span class="str">"function"</span>,
+        <span class="key">"function"</span>: {
+          <span class="key">"name"</span>: <span class="str">"code_interpreter"</span>,
+          <span class="key">"arguments"</span>: <span class="str">"{\"code\": \"def binary_search...\"}"</span>
+        }
+      }]
+    },
+    <span class="key">"finish_reason"</span>: <span class="kw">null</span>
+  }],
+  <span class="key">"usage"</span>: { <span class="key">"prompt_tokens"</span>: <span class="num">1240</span>, <span class="key">"completion_tokens"</span>: <span class="num">386</span> }
+}</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Model Config -->
+  <div class="subsection" id="arch-model">
+    <div class="subsection-title"><span class="chevron">&#9662;</span> Model Configuration</div>
+    <div class="subsection-content">
+      <table class="config-table">
+        <thead><tr><th>Parameter</th><th>Value</th><th>Rationale</th></tr></thead>
+        <tbody>
+          <tr><td><code>model</code></td><td>claude-opus-4-20260301</td><td>Highest reasoning capability for complex code tasks</td></tr>
+          <tr><td><code>temperature</code></td><td>0.2</td><td>Low variance for deterministic, correct code generation</td></tr>
+          <tr><td><code>top_p</code></td><td>0.9</td><td>Slight nucleus sampling for natural language explanations</td></tr>
+          <tr><td><code>max_tokens</code></td><td>8192</td><td>Sufficient for large code blocks with explanation</td></tr>
+          <tr><td><code>top_k</code></td><td>40</td><td>Constrained token selection for code accuracy</td></tr>
+          <tr><td><code>stop_sequences</code></td><td><code>["```\n\n\n"]</code></td><td>Prevent runaway generation after code blocks</td></tr>
+          <tr><td><code>context_window</code></td><td>200K tokens</td><td>Full codebase context support</td></tr>
+          <tr><td><code>fallback_model</code></td><td>claude-sonnet-4</td><td>Cost-efficient fallback for simpler queries</td></tr>
+        </tbody>
+      </table>
+      <div class="callout">The orchestrator dynamically selects between Opus and Sonnet based on query complexity scoring. Queries involving multi-file refactors, architecture decisions, or security reviews always route to Opus.</div>
+    </div>
+  </div>
+
+  <!-- Tool Schemas -->
+  <div class="subsection" id="arch-tools">
+    <div class="subsection-title"><span class="chevron">&#9662;</span> Tool / Function Calling Schemas</div>
+    <div class="subsection-content">
+      <div class="code-block">
+        <div class="code-block-header"><span>tools.json</span><button class="copy-btn" onclick="copyCode(this)">&#9112; Copy</button></div>
+        <pre>[
+  {
+    <span class="key">"name"</span>: <span class="str">"code_interpreter"</span>,
+    <span class="key">"description"</span>: <span class="str">"Execute code in a sandboxed environment and return stdout/stderr"</span>,
+    <span class="key">"parameters"</span>: {
+      <span class="key">"type"</span>: <span class="str">"object"</span>,
+      <span class="key">"properties"</span>: {
+        <span class="key">"language"</span>: { <span class="key">"type"</span>: <span class="str">"string"</span>, <span class="key">"enum"</span>: [<span class="str">"python"</span>, <span class="str">"javascript"</span>, <span class="str">"typescript"</span>, <span class="str">"bash"</span>] },
+        <span class="key">"code"</span>: { <span class="key">"type"</span>: <span class="str">"string"</span> },
+        <span class="key">"timeout_ms"</span>: { <span class="key">"type"</span>: <span class="str">"integer"</span>, <span class="key">"default"</span>: <span class="num">30000</span> }
+      },
+      <span class="key">"required"</span>: [<span class="str">"language"</span>, <span class="str">"code"</span>]
+    }
+  },
+  {
+    <span class="key">"name"</span>: <span class="str">"file_system"</span>,
+    <span class="key">"description"</span>: <span class="str">"Read, write, or search files within the project workspace"</span>,
+    <span class="key">"parameters"</span>: {
+      <span class="key">"type"</span>: <span class="str">"object"</span>,
+      <span class="key">"properties"</span>: {
+        <span class="key">"operation"</span>: { <span class="key">"type"</span>: <span class="str">"string"</span>, <span class="key">"enum"</span>: [<span class="str">"read"</span>, <span class="str">"write"</span>, <span class="str">"search"</span>, <span class="str">"list"</span>] },
+        <span class="key">"path"</span>: { <span class="key">"type"</span>: <span class="str">"string"</span> },
+        <span class="key">"content"</span>: { <span class="key">"type"</span>: <span class="str">"string"</span> },
+        <span class="key">"pattern"</span>: { <span class="key">"type"</span>: <span class="str">"string"</span> }
+      },
+      <span class="key">"required"</span>: [<span class="str">"operation"</span>]
+    }
+  },
+  {
+    <span class="key">"name"</span>: <span class="str">"web_search"</span>,
+    <span class="key">"description"</span>: <span class="str">"Search documentation, Stack Overflow, and technical references"</span>,
+    <span class="key">"parameters"</span>: {
+      <span class="key">"type"</span>: <span class="str">"object"</span>,
+      <span class="key">"properties"</span>: {
+        <span class="key">"query"</span>: { <span class="key">"type"</span>: <span class="str">"string"</span> },
+        <span class="key">"sources"</span>: { <span class="key">"type"</span>: <span class="str">"array"</span>, <span class="key">"items"</span>: { <span class="key">"type"</span>: <span class="str">"string"</span> } },
+        <span class="key">"max_results"</span>: { <span class="key">"type"</span>: <span class="str">"integer"</span>, <span class="key">"default"</span>: <span class="num">5</span> }
+      },
+      <span class="key">"required"</span>: [<span class="str">"query"</span>]
+    }
+  },
+  {
+    <span class="key">"name"</span>: <span class="str">"static_analysis"</span>,
+    <span class="key">"description"</span>: <span class="str">"Run linting, type checking, or security scanning on code"</span>,
+    <span class="key">"parameters"</span>: {
+      <span class="key">"type"</span>: <span class="str">"object"</span>,
+      <span class="key">"properties"</span>: {
+        <span class="key">"analyzer"</span>: { <span class="key">"type"</span>: <span class="str">"string"</span>, <span class="key">"enum"</span>: [<span class="str">"lint"</span>, <span class="str">"typecheck"</span>, <span class="str">"security"</span>, <span class="str">"complexity"</span>] },
+        <span class="key">"code"</span>: { <span class="key">"type"</span>: <span class="str">"string"</span> },
+        <span class="key">"language"</span>: { <span class="key">"type"</span>: <span class="str">"string"</span> }
+      },
+      <span class="key">"required"</span>: [<span class="str">"analyzer"</span>, <span class="str">"code"</span>, <span class="str">"language"</span>]
+    }
+  }
+]</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Memory Strategy -->
+  <div class="subsection" id="arch-memory">
+    <div class="subsection-title"><span class="chevron">&#9662;</span> Memory &amp; Context Management</div>
+    <div class="subsection-content">
+      <div class="card-grid">
+        <div class="info-card">
+          <div class="info-card-title">Short-Term Memory</div>
+          <p><strong>Sliding window</strong> of the last 20 conversation turns stored in Redis. Older messages are compressed via LLM summarization into a context digest that preserves key decisions, code artifacts, and user preferences.</p>
+        </div>
+        <div class="info-card">
+          <div class="info-card-title">Long-Term Memory</div>
+          <p>PostgreSQL stores <strong>project profiles</strong> (tech stack, conventions, key files), <strong>user preferences</strong> (style, verbosity), and <strong>resolved patterns</strong> (recurring bug types, preferred solutions). Queried via embedding similarity.</p>
+        </div>
+        <div class="info-card">
+          <div class="info-card-title">Context Assembly</div>
+          <p>Each request context is assembled as: <code>system_prompt</code> + <code>project_profile</code> + <code>recent_summary</code> + <code>last_N_turns</code> + <code>current_request</code>. Total budget: 180K tokens (reserving 20K for output).</p>
+        </div>
+        <div class="info-card">
+          <div class="info-card-title">Eviction Policy</div>
+          <p>When context exceeds budget: (1) summarize oldest turns, (2) drop tool output details (keep results), (3) compress code blocks to signatures. User messages and final code outputs are never evicted.</p>
+        </div>
+      </div>
+      <div class="code-block">
+        <div class="code-block-header"><span>context-assembly.py</span><button class="copy-btn" onclick="copyCode(this)">&#9112; Copy</button></div>
+        <pre><span class="kw">def</span> <span class="fn">assemble_context</span>(<span class="param">session</span>: <span class="type">Session</span>, <span class="param">request</span>: <span class="type">str</span>) -> <span class="type">list</span>[<span class="type">Message</span>]:
+    <span class="str">"""Assemble context within the 180K token budget."""</span>
+    <span class="param">budget</span> = <span class="num">180_000</span>
+    <span class="param">context</span> = []
+
+    <span class="cmt"># 1. System prompt (always included, ~2K tokens)</span>
+    <span class="param">context</span>.<span class="fn">append</span>(<span class="fn">system_message</span>(<span class="param">SYSTEM_PROMPT</span>))
+    <span class="param">budget</span> -= <span class="fn">count_tokens</span>(<span class="param">SYSTEM_PROMPT</span>)
+
+    <span class="cmt"># 2. Project profile from long-term memory (~1-3K)</span>
+    <span class="param">profile</span> = <span class="fn">get_project_profile</span>(<span class="param">session</span>.project_id)
+    <span class="kw">if</span> <span class="param">profile</span>:
+        <span class="param">context</span>.<span class="fn">append</span>(<span class="fn">system_message</span>(<span class="param">profile</span>.to_prompt()))
+        <span class="param">budget</span> -= <span class="fn">count_tokens</span>(<span class="param">profile</span>)
+
+    <span class="cmt"># 3. Conversation summary (compressed older turns)</span>
+    <span class="kw">if</span> <span class="param">session</span>.summary:
+        <span class="param">context</span>.<span class="fn">append</span>(<span class="fn">system_message</span>(<span class="param">session</span>.summary))
+        <span class="param">budget</span> -= <span class="fn">count_tokens</span>(<span class="param">session</span>.summary)
+
+    <span class="cmt"># 4. Recent turns (newest first, fill remaining budget)</span>
+    <span class="param">recent</span> = <span class="param">session</span>.<span class="fn">get_recent_turns</span>(limit=<span class="num">20</span>)
+    <span class="kw">for</span> <span class="param">turn</span> <span class="kw">in</span> <span class="fn">reversed</span>(<span class="param">recent</span>):
+        <span class="param">cost</span> = <span class="fn">count_tokens</span>(<span class="param">turn</span>)
+        <span class="kw">if</span> <span class="param">cost</span> > <span class="param">budget</span>:
+            <span class="kw">break</span>
+        <span class="param">context</span>.<span class="fn">append</span>(<span class="param">turn</span>)
+        <span class="param">budget</span> -= <span class="param">cost</span>
+
+    <span class="cmt"># 5. Current request</span>
+    <span class="param">context</span>.<span class="fn">append</span>(<span class="fn">user_message</span>(<span class="param">request</span>))
+    <span class="kw">return</span> <span class="param">context</span></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== -->
+<!-- SECTION 3: WORKFLOW -->
+<!-- ============================== -->
+<section class="doc-section" id="workflow">
+  <div class="section-header">
+    <span class="section-number">03</span>
+    <h2>Workflow Definition</h2>
+  </div>
+  <p class="section-desc">
+    Detailed operational workflows covering the agent loop, error recovery, multi-turn conversations, code generation pipelines, and review processes.
+  </p>
+
+  <!-- Agent Loop Flowchart -->
+  <div class="subsection" id="wf-loop">
+    <div class="subsection-title"><span class="chevron">&#9662;</span> Main Agent Loop</div>
+    <div class="subsection-content">
+      <p>The core execution cycle for every user request. Each step has defined inputs, outputs, and failure modes.</p>
+      <div class="diagram-container">
+        <div class="flowchart">
+          <div class="flow-step">
+            <div class="flow-step-num">1</div>
+            <div><div class="flow-step-text">Receive &amp; Validate</div><div class="flow-step-sub">Parse input, authenticate, check rate limits</div></div>
+          </div>
+          <div class="flow-arrow-down">&#9661;</div>
+          <div class="flow-step">
+            <div class="flow-step-num">2</div>
+            <div><div class="flow-step-text">Analyze Intent</div><div class="flow-step-sub">Classify task type: generate, debug, review, explain, refactor</div></div>
+          </div>
+          <div class="flow-arrow-down">&#9661;</div>
+          <div class="flow-step">
+            <div class="flow-step-num">3</div>
+            <div><div class="flow-step-text">Plan Execution</div><div class="flow-step-sub">Select tools, determine order, estimate token budget</div></div>
+          </div>
+          <div class="flow-arrow-down">&#9661;</div>
+          <div class="flow-step">
+            <div class="flow-step-num">4</div>
+            <div><div class="flow-step-text">Execute Tools</div><div class="flow-step-sub">Run code interpreter, search, file ops in parallel where possible</div></div>
+          </div>
+          <div class="flow-arrow-down">&#9661;</div>
+          <div class="flow-step">
+            <div class="flow-step-num">5</div>
+            <div><div class="flow-step-text">Review &amp; Validate</div><div class="flow-step-sub">Check code correctness, run static analysis, verify constraints</div></div>
+          </div>
+          <div class="flow-arrow-down">&#9661;</div>
+          <div class="flow-step">
+            <div class="flow-step-num">6</div>
+            <div><div class="flow-step-text">Respond</div><div class="flow-step-sub">Stream formatted response with code, explanations, and follow-ups</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="callout">Steps 3&ndash;5 may loop up to 3 times if the review step identifies issues. After 3 iterations, the agent responds with the best available result plus explicit caveats about unresolved concerns.</div>
+    </div>
+  </div>
+
+  <!-- Error Handling -->
+  <div class="subsection" id="wf-errors">
+    <div class="subsection-title"><span class="chevron">&#9662;</span> Error Handling &amp; Fallback Strategies</div>
+    <div class="subsection-content">
+      <table class="config-table">
+        <thead><tr><th>Error Class</th><th>Strategy</th><th>User Impact</th></tr></thead>
+        <tbody>
+          <tr><td><code>ToolTimeout</code></td><td>Retry once with 2x timeout. If still fails, skip tool and generate response from LLM knowledge only.</td><td>Partial response with disclaimer</td></tr>
+          <tr><td><code>ToolError</code></td><td>Log error, attempt alternative tool if available. For code_interpreter errors, return the error output as debugging context.</td><td>Error shown with suggested fix</td></tr>
+          <tr><td><code>RateLimitExceeded</code></td><td>Queue request with exponential backoff (1s, 2s, 4s). Return 429 with retry-after header after 3 attempts.</td><td>Brief delay or retry prompt</td></tr>
+          <tr><td><code>ContextOverflow</code></td><td>Trigger aggressive summarization of older turns. If still over budget, drop tool outputs and keep only final results.</td><td>Seamless (user doesn't notice)</td></tr>
+          <tr><td><code>ModelUnavailable</code></td><td>Failover to fallback model (Sonnet). If both unavailable, return 503 with estimated recovery time.</td><td>Slightly different output quality</td></tr>
+          <tr><td><code>MalformedInput</code></td><td>Return 400 with specific validation errors. Do not attempt to process partial input.</td><td>Clear error message</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Multi-Turn Management -->
+  <div class="subsection" id="wf-multi">
+    <div class="subsection-title"><span class="chevron">&#9662;</span> Multi-Turn Conversation Management</div>
+    <div class="subsection-content">
+      <div class="card-grid">
+        <div class="info-card">
+          <div class="info-card-title">Reference Resolution</div>
+          <p>Pronouns and implicit references ("fix that", "add tests for it") are resolved against the last code artifact, file, or function mentioned. Ambiguous references trigger a clarification request.</p>
+        </div>
+        <div class="info-card">
+          <div class="info-card-title">State Tracking</div>
+          <p>The orchestrator maintains a <strong>working set</strong> of active files, current code version, pending changes, and established constraints. This persists across turns within a session.</p>
+        </div>
+        <div class="info-card">
+          <div class="info-card-title">Context Continuity</div>
+          <p>Each turn receives the full assembled context. The agent can reference any prior code, decision, or discussion point. Summarization preserves key decisions and code artifacts.</p>
+        </div>
+        <div class="info-card">
+          <div class="info-card-title">Correction Handling</div>
+          <p>When a user corrects the agent, it acknowledges the correction, updates its working assumptions, and re-generates. Corrections are flagged in memory to prevent repeating the same mistake.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Code Gen Pipeline -->
+  <div class="subsection" id="wf-codegen">
+    <div class="subsection-title"><span class="chevron">&#9662;</span> Code Generation Pipeline</div>
+    <div class="subsection-content">
+      <div class="code-block">
+        <div class="code-block-header"><span>codegen-pipeline.py</span><button class="copy-btn" onclick="copyCode(this)">&#9112; Copy</button></div>
+        <pre><span class="kw">async def</span> <span class="fn">code_generation_pipeline</span>(<span class="param">request</span>: <span class="type">CodeGenRequest</span>) -> <span class="type">CodeGenResult</span>:
+    <span class="str">"""
+    Multi-stage pipeline for code generation with validation.
+    Stages: Understand → Scaffold → Implement → Validate → Polish
+    """</span>
+
+    <span class="cmt"># Stage 1: Understand requirements</span>
+    <span class="param">analysis</span> = <span class="kw">await</span> <span class="fn">analyze_requirements</span>(
+        <span class="param">request</span>.prompt,
+        <span class="param">request</span>.context,
+        <span class="param">request</span>.existing_code,
+    )
+
+    <span class="cmt"># Stage 2: Scaffold structure</span>
+    <span class="param">scaffold</span> = <span class="kw">await</span> <span class="fn">generate_scaffold</span>(
+        <span class="param">analysis</span>.task_type,       <span class="cmt"># function, class, module, etc.</span>
+        <span class="param">analysis</span>.language,
+        <span class="param">analysis</span>.dependencies,
+        <span class="param">analysis</span>.interfaces,       <span class="cmt"># input/output signatures</span>
+    )
+
+    <span class="cmt"># Stage 3: Implement with full logic</span>
+    <span class="param">implementation</span> = <span class="kw">await</span> <span class="fn">implement_code</span>(
+        <span class="param">scaffold</span>,
+        <span class="param">analysis</span>,
+        temperature=<span class="num">0.2</span>,         <span class="cmt"># low creativity for correctness</span>
+    )
+
+    <span class="cmt"># Stage 4: Validate</span>
+    <span class="param">validation</span> = <span class="kw">await</span> <span class="fn">validate_code</span>(
+        <span class="param">implementation</span>,
+        checks=[
+            <span class="str">"syntax_valid"</span>,         <span class="cmt"># parseable without errors</span>
+            <span class="str">"type_correct"</span>,         <span class="cmt"># passes type checker</span>
+            <span class="str">"no_security_issues"</span>,   <span class="cmt"># passes security scan</span>
+            <span class="str">"tests_pass"</span>,           <span class="cmt"># if tests provided/generated</span>
+        ]
+    )
+
+    <span class="cmt"># Stage 5: Polish (formatting, docstrings, comments)</span>
+    <span class="kw">if</span> <span class="param">validation</span>.passed:
+        <span class="param">final</span> = <span class="kw">await</span> <span class="fn">polish_code</span>(<span class="param">implementation</span>, <span class="param">analysis</span>.style_guide)
+        <span class="kw">return</span> <span class="type">CodeGenResult</span>(code=<span class="param">final</span>, status=<span class="str">"success"</span>)
+
+    <span class="cmt"># Retry loop (max 2 additional attempts)</span>
+    <span class="kw">for</span> <span class="param">attempt</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="num">2</span>):
+        <span class="param">implementation</span> = <span class="kw">await</span> <span class="fn">fix_issues</span>(
+            <span class="param">implementation</span>, <span class="param">validation</span>.errors
+        )
+        <span class="param">validation</span> = <span class="kw">await</span> <span class="fn">validate_code</span>(<span class="param">implementation</span>)
+        <span class="kw">if</span> <span class="param">validation</span>.passed:
+            <span class="kw">break</span>
+
+    <span class="kw">return</span> <span class="type">CodeGenResult</span>(
+        code=<span class="param">implementation</span>,
+        status=<span class="str">"partial"</span> <span class="kw">if not</span> <span class="param">validation</span>.passed <span class="kw">else</span> <span class="str">"success"</span>,
+        warnings=<span class="param">validation</span>.errors,
+    )</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Code Review Workflow -->
+  <div class="subsection" id="wf-review">
+    <div class="subsection-title"><span class="chevron">&#9662;</span> Code Review Workflow</div>
+    <div class="subsection-content">
+      <p>When reviewing user-submitted code, CodePilot follows a structured multi-pass review process.</p>
+      <div class="info-card">
+        <div class="info-card-title">Review Passes (in order)</div>
+        <ol>
+          <li><strong>Security Scan</strong> &mdash; SQL injection, XSS, CSRF, auth issues, secret exposure, dependency vulnerabilities</li>
+          <li><strong>Correctness Analysis</strong> &mdash; Logic errors, off-by-one, null handling, race conditions, edge cases</li>
+          <li><strong>Performance Review</strong> &mdash; Time/space complexity, unnecessary allocations, N+1 queries, missing indexes</li>
+          <li><strong>Style &amp; Conventions</strong> &mdash; Naming, formatting, idiomatic patterns, documentation completeness</li>
+          <li><strong>Architecture Concerns</strong> &mdash; Coupling, cohesion, SOLID violations, testability, separation of concerns</li>
+        </ol>
+      </div>
+      <div class="callout warn">Findings are categorized by severity: <strong style="color:var(--error)">Critical</strong> (must fix before merge), <strong style="color:var(--warning)">Warning</strong> (should fix), <strong style="color:var(--text-secondary)">Suggestion</strong> (nice to have). Only Critical findings block approval.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== -->
+<!-- SECTION 4: INTERACTIVE DEMO -->
+<!-- ============================== -->
+<section class="doc-section" id="demo">
+  <div class="section-header">
+    <span class="section-number">04</span>
+    <h2>Interactive Demo</h2>
+  </div>
+  <p class="section-desc">
+    Live simulations of CodePilot in action &mdash; explore pre-scripted conversations for code generation, debugging, and review workflows.
+  </p>
+
+  <!-- Chat Simulation -->
+  <div class="subsection" id="demo-chat">
+    <div class="subsection-title"><span class="chevron">&#9662;</span> Chat Simulation</div>
+    <div class="subsection-content">
+      <p>Select a scenario to watch CodePilot handle different types of development tasks.</p>
+      <div class="chat-container">
+        <div class="chat-header">
+          <div class="chat-header-title">&#9672; CodePilot &mdash; Live Demo</div>
+          <div class="chat-tabs">
+            <button class="chat-tab active" data-scenario="codegen" onclick="renderChat('codegen')">Generate</button>
+            <button class="chat-tab" data-scenario="debug" onclick="renderChat('debug')">Debug</button>
+            <button class="chat-tab" data-scenario="review" onclick="renderChat('review')">Review</button>
+          </div>
+        </div>
+        <div class="chat-messages" id="chat-messages"></div>
+        <div class="chat-input-area">
+          <input class="chat-input" type="text" placeholder="This is a read-only demo &mdash; select a scenario above" disabled>
+          <button class="chat-send-btn" disabled>Send</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Live Architecture Diagrams -->
+  <div class="subsection" id="demo-arch">
+    <div class="subsection-title"><span class="chevron">&#9662;</span> Live Architecture Visualization</div>
+    <div class="subsection-content">
+      <p>Animated request flow. Hover over any component to see its role in the pipeline.</p>
+      <div class="diagram-container" id="live-arch">
+        <svg width="100%" height="320" viewBox="0 0 820 320" fill="none" xmlns="http://www.w3.org/2000/svg" style="max-width:820px;display:block;margin:0 auto">
+          <!-- Connection lines -->
+          <line x1="95" y1="160" x2="195" y2="160" class="svg-line" stroke="var(--border-color)" stroke-width="2" stroke-dasharray="6 4"/>
+          <line x1="315" y1="160" x2="395" y2="160" class="svg-line" stroke="var(--border-color)" stroke-width="2" stroke-dasharray="6 4"/>
+          <line x1="515" y1="160" x2="595" y2="160" class="svg-line" stroke="var(--border-color)" stroke-width="2" stroke-dasharray="6 4"/>
+          <line x1="715" y1="100" x2="760" y2="60" class="svg-line" stroke="var(--border-color)" stroke-width="2" stroke-dasharray="6 4"/>
+          <line x1="715" y1="140" x2="760" y2="130" class="svg-line" stroke="var(--border-color)" stroke-width="2" stroke-dasharray="6 4"/>
+          <line x1="715" y1="180" x2="760" y2="200" class="svg-line" stroke="var(--border-color)" stroke-width="2" stroke-dasharray="6 4"/>
+          <line x1="715" y1="220" x2="760" y2="270" class="svg-line" stroke="var(--border-color)" stroke-width="2" stroke-dasharray="6 4"/>
+
+          <!-- Animated data particles -->
+          <circle r="3" fill="var(--accent)">
+            <animateMotion dur="3s" repeatCount="indefinite" path="M95,160 L195,160 L315,160 L395,160 L515,160 L595,160 L715,160"/>
+          </circle>
+          <circle r="3" fill="var(--accent-secondary)" opacity="0.6">
+            <animateMotion dur="3s" repeatCount="indefinite" begin="1.5s" path="M95,160 L195,160 L315,160 L395,160 L515,160 L595,160 L715,160"/>
+          </circle>
+
+          <!-- User Node -->
+          <rect x="20" y="120" width="75" height="80" rx="10" fill="var(--diagram-node)" stroke="var(--diagram-stroke)" stroke-width="1.5"/>
+          <text x="57" y="155" text-anchor="middle" font-size="22" fill="var(--text-primary)">&#128100;</text>
+          <text x="57" y="178" text-anchor="middle" font-size="11" font-weight="600" fill="var(--text-primary)" font-family="var(--font-body)">User</text>
+          <text x="57" y="192" text-anchor="middle" font-size="9" fill="var(--text-muted)" font-family="var(--font-mono)">IDE / CLI</text>
+
+          <!-- Gateway Node -->
+          <rect x="195" y="120" width="120" height="80" rx="10" fill="var(--diagram-node)" stroke="var(--diagram-stroke)" stroke-width="1.5"/>
+          <text x="255" y="152" text-anchor="middle" font-size="22" fill="var(--text-primary)">&#9889;</text>
+          <text x="255" y="174" text-anchor="middle" font-size="11" font-weight="600" fill="var(--text-primary)" font-family="var(--font-body)">API Gateway</text>
+          <text x="255" y="192" text-anchor="middle" font-size="9" fill="var(--text-muted)" font-family="var(--font-mono)">Auth + Limits</text>
+
+          <!-- Orchestrator Node (highlighted) -->
+          <rect x="395" y="110" width="120" height="100" rx="10" fill="var(--diagram-node)" stroke="var(--accent)" stroke-width="2"/>
+          <text x="455" y="145" text-anchor="middle" font-size="22" fill="var(--accent)">&#9881;</text>
+          <text x="455" y="168" text-anchor="middle" font-size="11" font-weight="700" fill="var(--accent)" font-family="var(--font-body)">Orchestrator</text>
+          <text x="455" y="184" text-anchor="middle" font-size="9" fill="var(--text-muted)" font-family="var(--font-mono)">Agent Core</text>
+          <text x="455" y="200" text-anchor="middle" font-size="9" fill="var(--text-muted)" font-family="var(--font-mono)">Loop Engine</text>
+
+          <!-- LLM Node -->
+          <rect x="595" y="120" width="120" height="80" rx="10" fill="var(--diagram-node)" stroke="var(--diagram-stroke)" stroke-width="1.5"/>
+          <text x="655" y="152" text-anchor="middle" font-size="22" fill="var(--text-primary)">&#9733;</text>
+          <text x="655" y="174" text-anchor="middle" font-size="11" font-weight="600" fill="var(--text-primary)" font-family="var(--font-body)">LLM Engine</text>
+          <text x="655" y="192" text-anchor="middle" font-size="9" fill="var(--text-muted)" font-family="var(--font-mono)">Claude Opus 4</text>
+
+          <!-- Tool Nodes -->
+          <rect x="760" y="30" width="50" height="50" rx="8" fill="var(--diagram-node)" stroke="var(--diagram-stroke)" stroke-width="1"/>
+          <text x="785" y="53" text-anchor="middle" font-size="14">&#9654;</text>
+          <text x="785" y="70" text-anchor="middle" font-size="7" fill="var(--text-muted)" font-family="var(--font-mono)">Code</text>
+
+          <rect x="760" y="100" width="50" height="50" rx="8" fill="var(--diagram-node)" stroke="var(--diagram-stroke)" stroke-width="1"/>
+          <text x="785" y="123" text-anchor="middle" font-size="14">&#128269;</text>
+          <text x="785" y="140" text-anchor="middle" font-size="7" fill="var(--text-muted)" font-family="var(--font-mono)">Search</text>
+
+          <rect x="760" y="170" width="50" height="50" rx="8" fill="var(--diagram-node)" stroke="var(--diagram-stroke)" stroke-width="1"/>
+          <text x="785" y="193" text-anchor="middle" font-size="14">&#128193;</text>
+          <text x="785" y="210" text-anchor="middle" font-size="7" fill="var(--text-muted)" font-family="var(--font-mono)">Files</text>
+
+          <rect x="760" y="240" width="50" height="50" rx="8" fill="var(--diagram-node)" stroke="var(--diagram-stroke)" stroke-width="1"/>
+          <text x="785" y="263" text-anchor="middle" font-size="14">&#128202;</text>
+          <text x="785" y="280" text-anchor="middle" font-size="7" fill="var(--text-muted)" font-family="var(--font-mono)">Analyze</text>
+
+          <!-- Memory (below orchestrator) -->
+          <line x1="455" y1="210" x2="455" y2="270" stroke="var(--border-color)" stroke-width="2" stroke-dasharray="6 4"/>
+          <rect x="395" y="270" width="120" height="45" rx="8" fill="var(--diagram-node)" stroke="var(--diagram-stroke)" stroke-width="1"/>
+          <text x="455" y="290" text-anchor="middle" font-size="11" font-weight="600" fill="var(--text-primary)" font-family="var(--font-body)">Memory</text>
+          <text x="455" y="305" text-anchor="middle" font-size="9" fill="var(--text-muted)" font-family="var(--font-mono)">Redis + PG</text>
+        </svg>
+      </div>
+      <div class="callout">Data particles animate the request flow from User through Gateway, Orchestrator, and LLM to Tools. The Orchestrator acts as the central coordinator, managing tool dispatch and response assembly.</div>
+    </div>
+  </div>
+</section>
+
+</div>
+</main>
+
+<script>
+// === THEME TOGGLE ===
+function toggleTheme() {
+  const html = document.documentElement;
+  const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  html.setAttribute('data-theme', next);
+  localStorage.setItem('codepilot-theme', next);
+}
+(function() {
+  const saved = localStorage.getItem('codepilot-theme');
+  if (saved) document.documentElement.setAttribute('data-theme', saved);
+})();
+
+// === COPY TO CLIPBOARD ===
+function copyCode(btn) {
+  const block = btn.closest('.code-block, .prompt-block');
+  const pre = block.querySelector('pre');
+  const text = pre.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.classList.add('copied');
+    btn.innerHTML = '&#10003; Copied!';
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      btn.innerHTML = '&#9112; Copy';
+    }, 2000);
+  });
+}
+
+// === SCROLL SPY ===
+function initScrollSpy() {
+  const navItems = document.querySelectorAll('.nav-item[href]');
+  const sections = [];
+  navItems.forEach(item => {
+    const id = item.getAttribute('href').slice(1);
+    const el = document.getElementById(id);
+    if (el) sections.push({ el, link: item });
+  });
+
+  function update() {
+    let current = sections[0];
+    const offset = window.scrollY + 120;
+    for (const s of sections) {
+      if (s.el.offsetTop <= offset) current = s;
+    }
+    navItems.forEach(n => n.classList.remove('active'));
+    if (current) current.link.classList.add('active');
+  }
+  window.addEventListener('scroll', update, { passive: true });
+  update();
+}
+
+// === SECTION REVEAL ===
+function initReveal() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) e.target.classList.add('visible');
+    });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.doc-section').forEach(s => observer.observe(s));
+}
+
+// === COLLAPSIBLE SUBSECTIONS ===
+function initCollapsible() {
+  document.querySelectorAll('.subsection-title').forEach(title => {
+    title.addEventListener('click', () => {
+      title.classList.toggle('collapsed');
+      const content = title.nextElementSibling;
+      if (content && content.classList.contains('subsection-content')) {
+        content.classList.toggle('collapsed');
+      }
+    });
+  });
+}
+
+// === CHAT DEMO ===
+const chatScenarios = {
+  codegen: [
+    { role: 'user', text: 'Write a Python function that implements binary search on a sorted array.' },
+    { role: 'agent', text: 'I\'ll implement binary search with clear documentation and edge case handling.', code: { lang: 'python', content: `<span class="kw">def</span> <span class="fn">binary_search</span>(<span class="param">arr</span>: <span class="type">list</span>[<span class="type">int</span>], <span class="param">target</span>: <span class="type">int</span>) -> <span class="type">int</span>:
+    <span class="str">"""Search for target in sorted array.
+    Returns index if found, -1 otherwise.
+    Time: O(log n) | Space: O(1)
+    """</span>
+    <span class="param">low</span>, <span class="param">high</span> = <span class="num">0</span>, <span class="fn">len</span>(<span class="param">arr</span>) - <span class="num">1</span>
+
+    <span class="kw">while</span> <span class="param">low</span> <= <span class="param">high</span>:
+        <span class="param">mid</span> = <span class="param">low</span> + (<span class="param">high</span> - <span class="param">low</span>) // <span class="num">2</span>
+        <span class="kw">if</span> <span class="param">arr</span>[<span class="param">mid</span>] == <span class="param">target</span>:
+            <span class="kw">return</span> <span class="param">mid</span>
+        <span class="kw">elif</span> <span class="param">arr</span>[<span class="param">mid</span>] < <span class="param">target</span>:
+            <span class="param">low</span> = <span class="param">mid</span> + <span class="num">1</span>
+        <span class="kw">else</span>:
+            <span class="param">high</span> = <span class="param">mid</span> - <span class="num">1</span>
+
+    <span class="kw">return</span> -<span class="num">1</span>` } },
+    { role: 'agent', text: 'Key design decisions:\n\n- Uses <code>low + (high - low) // 2</code> instead of <code>(low + high) // 2</code> to prevent integer overflow\n- Returns -1 for not-found (consistent with standard library conventions)\n- Type hints and docstring included for clarity\n- O(log n) time complexity, O(1) space' },
+  ],
+  debug: [
+    { role: 'user', text: 'My React component keeps re-rendering infinitely. Here\'s the code:', code: { lang: 'jsx', content: `<span class="kw">function</span> <span class="fn">UserProfile</span>({ <span class="param">userId</span> }) {
+  <span class="kw">const</span> [<span class="param">user</span>, <span class="fn">setUser</span>] = <span class="fn">useState</span>(<span class="kw">null</span>);
+
+  <span class="fn">useEffect</span>(() => {
+    <span class="fn">fetchUser</span>(<span class="param">userId</span>).<span class="fn">then</span>(<span class="param">data</span> => <span class="fn">setUser</span>(<span class="param">data</span>));
+  }); <span class="cmt">// &lt;-- missing dependency array</span>
+
+  <span class="kw">return</span> &lt;<span class="type">div</span>&gt;{<span class="param">user</span>?.name}&lt;/<span class="type">div</span>&gt;;
+}` } },
+    { role: 'agent', text: 'The infinite re-render is caused by a <strong>missing dependency array</strong> in <code>useEffect</code>. Without it, the effect runs after every render, which calls <code>setUser</code>, which triggers a re-render, creating an infinite loop.', code: { lang: 'jsx', content: `<span class="cmt">// Fix: add [userId] dependency array</span>
+<span class="fn">useEffect</span>(() => {
+  <span class="fn">fetchUser</span>(<span class="param">userId</span>).<span class="fn">then</span>(<span class="param">data</span> => <span class="fn">setUser</span>(<span class="param">data</span>));
+}, [<span class="param">userId</span>]); <span class="cmt">// Re-run only when userId changes</span>` } },
+    { role: 'agent', text: 'Additional recommendations:\n\n1. Add error handling with a <code>try/catch</code> block\n2. Add a loading state to prevent UI flicker\n3. Consider an abort controller for cleanup when the component unmounts' },
+  ],
+  review: [
+    { role: 'user', text: 'Review this API endpoint for security issues:', code: { lang: 'javascript', content: `<span class="param">app</span>.<span class="fn">post</span>(<span class="str">'/api/users'</span>, (<span class="param">req</span>, <span class="param">res</span>) => {
+  <span class="kw">const</span> <span class="param">query</span> = <span class="str">\`SELECT * FROM users
+    WHERE id = \${</span><span class="param">req</span>.body.id<span class="str">}\`</span>;
+  <span class="param">db</span>.<span class="fn">execute</span>(<span class="param">query</span>).<span class="fn">then</span>(<span class="param">r</span> => <span class="param">res</span>.<span class="fn">json</span>(<span class="param">r</span>));
+});` } },
+    { role: 'agent', text: '<strong style="color:var(--error)">Critical: SQL Injection Vulnerability</strong>\n\nDirect string interpolation of user input into SQL queries is a severe security flaw. An attacker can execute arbitrary SQL commands.', code: { lang: 'javascript', content: `<span class="cmt">// Secure version using parameterized queries</span>
+<span class="param">app</span>.<span class="fn">post</span>(<span class="str">'/api/users'</span>,
+  <span class="fn">validateBody</span>(<span class="param">userSchema</span>),  <span class="cmt">// input validation</span>
+  <span class="kw">async</span> (<span class="param">req</span>, <span class="param">res</span>) => {
+    <span class="kw">try</span> {
+      <span class="kw">const</span> <span class="param">result</span> = <span class="kw">await</span> <span class="param">db</span>.<span class="fn">execute</span>(
+        <span class="str">'SELECT id, name, email FROM users WHERE id = ?'</span>,
+        [<span class="param">req</span>.body.id]
+      );
+      <span class="param">res</span>.<span class="fn">json</span>(<span class="param">result</span>);
+    } <span class="kw">catch</span> (<span class="param">err</span>) {
+      <span class="param">res</span>.<span class="fn">status</span>(<span class="num">500</span>).<span class="fn">json</span>({ <span class="key">error</span>: <span class="str">'Internal error'</span> });
+    }
+});` } },
+    { role: 'agent', text: 'Issues found:\n\n1. <strong style="color:var(--error)">SQL injection</strong> — use parameterized queries\n2. <strong style="color:var(--warning)">SELECT *</strong> — only return needed columns\n3. <strong style="color:var(--warning)">No input validation</strong> — add schema validation middleware\n4. <strong style="color:var(--warning)">No error handling</strong> — add try/catch with safe error responses\n5. <strong style="color:var(--text-secondary)">No auth middleware</strong> — endpoint should require authentication' },
+  ]
+};
+
+function renderChat(scenario) {
+  const msgs = chatScenarios[scenario];
+  const container = document.getElementById('chat-messages');
+  container.innerHTML = '';
+  msgs.forEach((msg, i) => {
+    setTimeout(() => {
+      const div = document.createElement('div');
+      div.className = 'chat-msg';
+      let codeHtml = '';
+      if (msg.code) {
+        codeHtml = `<div class="code-block"><div class="code-block-header"><span>${msg.code.lang}</span><button class="copy-btn" onclick="copyCode(this)">&#9112; Copy</button></div><pre>${msg.code.content}</pre></div>`;
+      }
+      div.innerHTML = `
+        <div class="chat-avatar ${msg.role}">${msg.role === 'user' ? '&#9786;' : '&#9672;'}</div>
+        <div class="chat-bubble">${msg.text}${codeHtml}</div>
+      `;
+      container.appendChild(div);
+      container.scrollTop = container.scrollHeight;
+    }, i * 600);
+  });
+  // Update active tab
+  document.querySelectorAll('.chat-tab').forEach(t => t.classList.remove('active'));
+  document.querySelector(`.chat-tab[data-scenario="${scenario}"]`).classList.add('active');
+}
+
+// === INIT ===
+document.addEventListener('DOMContentLoaded', () => {
+  initScrollSpy();
+  initReveal();
+  initCollapsible();
+  // init chat
+  const chatEl = document.getElementById('chat-messages');
+  if (chatEl) renderChat('codegen');
+});
+</script>
+</body>
+</html>
