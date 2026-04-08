@@ -3,12 +3,14 @@
 
 A Flask-based web interface for the RAG pipeline.
 Uses mock providers by default (no API keys needed) with in-memory Qdrant.
+Supports: file uploads (PDF, DOCX, TXT, MD), web URL ingestion, text paste.
 """
 
 import hashlib
 import struct
 import logging
 import os
+import tempfile
 from pathlib import Path
 
 from flask import Flask, request, jsonify, send_from_directory
@@ -81,7 +83,6 @@ class SmartMockLLM(BaseLLM):
 
         # Build a coherent answer from context
         if context_blocks:
-            # Find the most relevant snippets (containing question keywords)
             q_words = set(question.lower().split())
             scored = []
             for block in context_blocks:
@@ -92,14 +93,13 @@ class SmartMockLLM(BaseLLM):
 
             answer_parts = []
             for score, block in scored[:3]:
-                # Trim to reasonable length
                 if len(block) > 300:
                     block = block[:297] + "..."
                 answer_parts.append(block)
 
             if answer_parts:
                 answer = f"Based on the available knowledge base:\n\n"
-                for i, part in enumerate(answer_parts):
+                for part in answer_parts:
                     answer += f"• {part}\n\n"
             else:
                 answer = (
@@ -133,6 +133,33 @@ pipeline = RAGPipeline(retriever=retriever, llm=llm)
 
 # Track ingested documents
 ingested_docs: list[dict] = []
+
+
+# ── Helper: ingest a Document into the pipeline ─────────────────────
+
+def _ingest_document(doc: Document, source_name: str, source_type_str: str, topic: str = "user-added") -> dict:
+    """Chunk, embed, and store a Document. Returns info dict."""
+    chunks = chunker.split(doc)
+    if not chunks:
+        raise ValueError("No chunks produced from the content")
+
+    texts = [c.text for c in chunks]
+    embeddings_list = embedding.embed_batch(texts)
+    for chunk, emb in zip(chunks, embeddings_list):
+        chunk.embedding = emb
+
+    store.upsert(chunks)
+
+    doc_info = {
+        "name": source_name,
+        "type": source_type_str,
+        "chunks": len(chunks),
+        "chars": len(doc.content),
+        "topic": topic,
+    }
+    ingested_docs.append(doc_info)
+    logger.info(f"Ingested '{source_name}': {len(chunks)} chunks, {len(doc.content)} chars")
+    return doc_info
 
 
 # ── Seed some demo data ─────────────────────────────────────────────
@@ -212,20 +239,7 @@ def seed_demo_data():
     ]
 
     for doc in demo_documents:
-        chunks = chunker.split(doc)
-        if chunks:
-            texts = [c.text for c in chunks]
-            embeddings_list = embedding.embed_batch(texts)
-            for chunk, emb in zip(chunks, embeddings_list):
-                chunk.embedding = emb
-            store.upsert(chunks)
-            ingested_docs.append({
-                "name": doc.source,
-                "type": doc.source_type.value,
-                "chunks": len(chunks),
-                "chars": len(doc.content),
-                "topic": doc.metadata.get("topic", "general"),
-            })
+        _ingest_document(doc, doc.source, doc.source_type.value, doc.metadata.get("topic", "general"))
 
     logger.info(f"Seeded {len(demo_documents)} demo documents ({store.count()} chunks)")
 
@@ -233,6 +247,7 @@ def seed_demo_data():
 # ── Flask App ───────────────────────────────────────────────────────
 
 app = Flask(__name__, static_folder="static")
+app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024  # 16 MB max upload
 
 
 @app.route("/")
@@ -249,6 +264,8 @@ def readme_page():
 def algorithm_image():
     return send_from_directory(".", "rag_3d_algorithm.png", mimetype="image/png")
 
+
+# ── Query Endpoint ──────────────────────────────────────────────────
 
 @app.route("/api/query", methods=["POST"])
 def api_query():
@@ -282,6 +299,8 @@ def api_query():
         return jsonify({"error": str(e)}), 500
 
 
+# ── Text Ingest Endpoint ────────────────────────────────────────────
+
 @app.route("/api/ingest", methods=["POST"])
 def api_ingest():
     """Ingest text content into the knowledge base."""
@@ -299,38 +318,203 @@ def api_ingest():
             source_type=SourceType.TEXT,
             metadata={"topic": "user-added"},
         )
-        chunks = chunker.split(doc)
-
-        if not chunks:
-            return jsonify({"error": "No chunks produced from the text"}), 400
-
-        texts = [c.text for c in chunks]
-        embeddings_list = embedding.embed_batch(texts)
-        for chunk, emb in zip(chunks, embeddings_list):
-            chunk.embedding = emb
-
-        store.upsert(chunks)
-
-        doc_info = {
-            "name": source_name,
-            "type": "text",
-            "chunks": len(chunks),
-            "chars": len(text),
-            "topic": "user-added",
-        }
-        ingested_docs.append(doc_info)
-
-        logger.info(f"Ingested '{source_name}': {len(chunks)} chunks")
-
+        info = _ingest_document(doc, source_name, "text")
         return jsonify({
             "message": f"Successfully ingested '{source_name}'",
-            "chunks": len(chunks),
+            "chunks": info["chunks"],
+            "chars": info["chars"],
             "total_chunks": store.count(),
         })
     except Exception as e:
         logger.error(f"Ingest error: {e}")
         return jsonify({"error": str(e)}), 500
 
+
+# ── File Upload Endpoint ────────────────────────────────────────────
+
+@app.route("/api/upload", methods=["POST"])
+def api_upload():
+    """Upload and ingest a file (PDF, DOCX, TXT, MD, etc.)."""
+    if "file" not in request.files:
+        return jsonify({"error": "No file provided"}), 400
+
+    file = request.files["file"]
+    if not file.filename:
+        return jsonify({"error": "No file selected"}), 400
+
+    filename = file.filename
+    ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
+
+    try:
+        # Save to temp file for loader-based processing
+        tmp_dir = tempfile.mkdtemp()
+        tmp_path = os.path.join(tmp_dir, filename)
+        file.save(tmp_path)
+
+        text = ""
+        file_type = "file"
+
+        if ext == "pdf":
+            try:
+                from ragforge.ingest.pdf_loader import PDFLoader
+                loader = PDFLoader()
+                docs = loader.load(tmp_path)
+                text = "\n\n".join(d.content for d in docs)
+                file_type = "pdf"
+            except ImportError:
+                return jsonify({"error": "PDF support requires PyMuPDF. Install with: pip install pymupdf"}), 400
+
+        elif ext == "docx":
+            try:
+                from ragforge.ingest.docx_loader import DocxLoader
+                loader = DocxLoader()
+                docs = loader.load(tmp_path)
+                text = "\n\n".join(d.content for d in docs)
+                file_type = "docx"
+            except ImportError:
+                return jsonify({"error": "DOCX support requires python-docx. Install with: pip install python-docx"}), 400
+
+        elif ext in ("txt", "md", "csv", "json", "py", "js", "html", "css", "log", "yaml", "yml", "xml", "rst", "tsv"):
+            from ragforge.ingest.text_loader import TextLoader
+            loader = TextLoader()
+            docs = loader.load(tmp_path)
+            text = "\n\n".join(d.content for d in docs)
+            file_type = "text"
+
+        else:
+            # Try reading as plain text
+            try:
+                with open(tmp_path, "r", encoding="utf-8", errors="replace") as f:
+                    text = f.read()
+                file_type = "text"
+            except Exception:
+                return jsonify({"error": f"Unsupported file type: .{ext}"}), 400
+
+        # Clean up temp file
+        try:
+            os.remove(tmp_path)
+            os.rmdir(tmp_dir)
+        except Exception:
+            pass
+
+        text = text.strip()
+        if not text:
+            return jsonify({"error": "File is empty or could not be read"}), 400
+
+        doc = Document(
+            content=text,
+            source=filename,
+            source_type=SourceType.FILE,
+            metadata={"topic": "user-upload", "file_type": ext},
+        )
+        info = _ingest_document(doc, filename, file_type, "user-upload")
+
+        return jsonify({
+            "message": f"Successfully ingested '{filename}'",
+            "chunks": info["chunks"],
+            "chars": info["chars"],
+            "total_chunks": store.count(),
+        })
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+    except Exception as e:
+        logger.error(f"Upload error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+# ── Web URL Ingest Endpoint ─────────────────────────────────────────
+
+@app.route("/api/ingest-url", methods=["POST"])
+def api_ingest_url():
+    """Ingest content from a web URL."""
+    data = request.json
+    url = data.get("url", "").strip()
+
+    if not url:
+        return jsonify({"error": "URL is required"}), 400
+
+    if not url.startswith(("http://", "https://")):
+        url = "https://" + url
+
+    try:
+        from ragforge.ingest.web_loader import WebLoader
+        loader = WebLoader()
+        docs = loader.load(url)
+
+        if not docs:
+            return jsonify({"error": "Could not extract content from the URL"}), 400
+
+        doc = docs[0]
+        title = doc.metadata.get("title", url)
+        source_name = title[:50] if len(title) > 50 else title
+
+        info = _ingest_document(doc, source_name, "url", "web")
+
+        return jsonify({
+            "message": f"Successfully ingested from URL",
+            "source": source_name,
+            "url": url,
+            "chunks": info["chunks"],
+            "chars": info["chars"],
+            "total_chunks": store.count(),
+        })
+    except ImportError:
+        return jsonify({"error": "Web loading requires requests and beautifulsoup4. Install with: pip install requests beautifulsoup4"}), 400
+    except Exception as e:
+        logger.error(f"URL ingest error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+# ── Delete & Clear Endpoints ────────────────────────────────────────
+
+@app.route("/api/delete", methods=["POST"])
+def api_delete():
+    """Delete a document from the knowledge base."""
+    data = request.json
+    doc_name = data.get("name", "").strip()
+    if not doc_name:
+        return jsonify({"error": "Document name is required"}), 400
+
+    global ingested_docs
+    original_count = len(ingested_docs)
+    ingested_docs = [d for d in ingested_docs if d["name"] != doc_name]
+    removed = original_count - len(ingested_docs)
+
+    if removed == 0:
+        return jsonify({"error": f"Document '{doc_name}' not found"}), 404
+
+    logger.info(f"Removed '{doc_name}' from document list")
+    return jsonify({
+        "message": f"Removed '{doc_name}'",
+        "total_documents": len(ingested_docs),
+    })
+
+
+@app.route("/api/clear", methods=["POST"])
+def api_clear():
+    """Clear ALL documents from the knowledge base."""
+    global ingested_docs, store
+
+    count = len(ingested_docs)
+    ingested_docs = []
+
+    # Recreate the vector store (in-memory clear)
+    store = QdrantStore(url=":memory:", collection="ragforge_qa", dimensions=EMBED_DIMS)
+
+    # Re-wire the retriever and pipeline
+    retriever.vector_store = store
+    retriever.embedding = embedding
+
+    logger.info(f"Cleared {count} documents from knowledge base")
+
+    return jsonify({
+        "message": f"Cleared {count} documents",
+        "total_documents": 0,
+        "total_chunks": 0,
+    })
+
+
+# ── Info Endpoints ──────────────────────────────────────────────────
 
 @app.route("/api/documents", methods=["GET"])
 def api_documents():
